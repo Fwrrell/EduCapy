@@ -10,7 +10,7 @@ router.use(isAdmin);
 
 // ----- CREATE GURU (ADMIN) -----
 router.post("/guru", async (req, res) => {
-  const { nama, email, password, alamat, pendidikan } = req.body;
+  const { nama, email, password, alamat, pendidikan, keahlian } = req.body;
 
   if (!nama || !email || !password || !alamat || !pendidikan) {
     return res.status(400).json({ message: "Lengkapi data yang diperlukan!" });
@@ -52,6 +52,14 @@ router.post("/guru", async (req, res) => {
     // insert ke table guru
     const insertGuru = "INSERT INTO guru (id_guru, pendidikan) VALUES (?, ?)";
     await connection.query(insertGuru, [newUserId, pendidikan]);
+
+    // insert ke table keahlian
+    if (keahlian && Array.isArray(keahlian) && keahlian.length > 0) {
+      const keahlianData = keahlian.map((id_mapel) => [newUserId, id_mapel]);
+      const insertKeahlian =
+        "INSERT INTO keahlian (id_guru, id_mapel) VALUES ?";
+      await connection.query(insertKeahlian, [keahlianData]);
+    }
 
     // commit jika transaction berhasil
     await connection.commit();
