@@ -1,32 +1,25 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
-import GuruDashboardPage from "./pages/Guru/GuruDashboardPage";
-
-const router = createBrowserRouter([
-  // section murid
-  {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  { path: "/register", element: <RegisterPage /> },
-  {
-    path: "/app",
-    element: <DashboardPage />,
-  },
-
-  // section guru
-  {
-    path: "/guru/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "/guru/app",
-    element: <GuruDashboardPage />,
-  },
-]);
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* public route */}
+        <Route element={<PublicRoute />}>
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Route>
+
+        {/* protected route */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/app" element={<DashboardPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }

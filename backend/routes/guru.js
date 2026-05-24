@@ -199,4 +199,124 @@ router.get("/kalender", async (req, res) => {
   }
 });
 
+router.get("/murid-aktif", async (req, res) => {
+  const id_guru = req.user.id_user;
+
+  try {
+    const getMuridAktif = `
+            SELECT 
+                u.id_user AS id_murid,
+                u.nama AS nama_murid,
+                tp.jenjang,
+                tp.tingkat,
+                mp.nama AS nama_mapel,
+                COUNT(pi.id_penditem) AS total_sesi,
+                SUM(CASE WHEN pi.status = 'Selesai' THEN 1 ELSE 0 END) AS sesi_selesai,
+                MAX(pi.tanggal_selesai) AS aktif_hingga
+            FROM pendaftaran_item pi
+            JOIN pendaftaran p ON pi.id_daftar = p.id_daftar
+            JOIN user u ON p.id_murid = u.id_user
+            JOIN murid m ON u.id_user = m.id_murid
+            LEFT JOIN tingkat_pendidikan tp ON m.id_pendidikan = tp.id_pendidikan
+            JOIN mata_pelajaran mp ON pi.id_mapel = mp.id_mapel
+            JOIN jadwal j ON pi.id_jadwal = j.id_jadwal
+            JOIN jadwal_kesediaan jk ON j.id_kesediaan = jk.id_kesediaan
+            WHERE jk.id_guru = ?
+            GROUP BY u.id_user, mp.id_mapel
+            ORDER BY aktif_hingga DESC
+        `;
+
+    const [muridAktif] = await db.query(getMuridAktif, [id_guru]);
+
+    res.status(200).json({
+      status: "success",
+      data: muridAktif,
+    });
+  } catch (error) {
+    console.error(err);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+});
+
+router.get("/riwayat-sesi", async (req, res) => {
+  const id_guru = req.user.id_user;
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || "";
+  const offset = (page - 1) * limit;
+
+  try {
+    // query untuk menghitung banyak murid yang udah diajar
+    const countMurid = `
+            SELECT COUNT(*) AS total_items
+            FROM pendaftaran_item pi
+            JOIN pendaftaran p ON pi.id_daftar = p.id_daftar
+            JOIN user u ON p.id_murid = u.id_user
+            JOIN mata_pelajaran mp ON pi.id_mapel = mp.id_mapel
+            JOIN jadwal j ON pi.id_jadwal = j.id_jadwal
+            JOIN jadwal_kesediaan jk ON j.id_kesediaan = jk.id_kesediaan
+            WHERE jk.id_guru = ?
+        `;
+    const countParams = [id_guru];
+
+    // query untuk mengambil data murid yang les
+    let dataQuery = `
+            SELECT 
+                pi.id_penditem,
+                pi.tanggal_mulai AS tanggal_sesi,
+                j.hari_mengajar,
+                pi.jam_mulai_les,
+                pi.jam_selesai_les,
+                u.nama AS nama_murid,
+                mp.nama AS nama_mapel,
+                pi.status,
+                pi.catatan
+            FROM pendaftaran_item pi
+            JOIN pendaftaran p ON pi.id_daftar = p.id_daftar
+            JOIN user u ON p.id_murid = u.id_user
+            JOIN mata_pelajaran mp ON pi.id_mapel = mp.id_mapel
+            JOIN jadwal j ON pi.id_jadwal = j.id_jadwal
+            JOIN jadwal_kesediaan jk ON j.id_kesediaan = jk.id_kesediaan
+            WHERE jk.id_guru = ?
+        `;
+    const dataParams = [id_guru];
+
+    // handle pencarian berdasarkan nama murid atau mata pelajaran
+    if (search) {
+      const searchPattern = `%${search}%`;
+      const searchSql = ` AND (u.nama LIKE ? OR mp.nama LIKE ?)`;
+
+      countMurid += searchSql;
+      countParams.push(searchPattern, searchPattern);
+
+      dataQuery += searchSql;
+      dataParams.push(searchPattern, searchPattern);
+    }
+
+    // sorting dan pagination
+    dataQuery += ` ORDER BY pi.tanggal_mulai DESC, pi.jam_mulai_les DESC LIMIT ? OFFSET ?`;
+    dataParams.push(limit, offset);
+
+    const [countResult] = await db.query(countMurid, countParams);
+    const [dataResult] = await db.query(dataQuery, dataParams);
+
+    const totalItems = countResult[0].total_items;
+
+    res.status(200).json({
+      status: "success",
+      pagination: {
+        total_items: totalItems,
+        total_pages: Math.ceil(totalItems / limit),
+        current_page: page,
+        limit: limit,
+      },
+      data: dataResult,
+    });
+  } catch (error) {
+    console.error(err);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+});
+
 module.exports = router;

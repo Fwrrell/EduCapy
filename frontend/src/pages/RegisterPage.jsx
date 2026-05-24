@@ -161,8 +161,9 @@ function RegisterPage() {
         throw new Error(result.message || "Registrasi gagal");
       }
 
-      alert("Registrasi berhasil");
+      localStorage.setItem("token", result.token);
 
+      alert("Registrasi berhasil");
       navigate("/app");
     } catch (err) {
       setError(err.message);
