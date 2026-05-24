@@ -4,28 +4,14 @@ require("dotenv").config();
 
 const db = require("./config/db");
 const app = express();
+const apiRouter = require("./routes");
 
 // middlewares
 app.use(cors()); // memberikan akses untuk resource sharing
 app.use(express.json()); // parsing JSON
 app.use(express.urlencoded({ extended: true })); // parsing URL
 
-// contoh route testing
-app.get("/api/tingkat-pendidikan", async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM tingkat_pendidikan");
-    res.status(200).json({
-      status: "success",
-      data: rows,
-    });
-  } catch (err) {
-    console.error("Error fetching data: ", err);
-    res.status(505).json({
-      status: "error",
-      message: "Internal server error",
-    });
-  }
-});
+app.use("/api", apiRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
