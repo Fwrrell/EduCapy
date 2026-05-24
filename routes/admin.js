@@ -4,6 +4,10 @@ const db = require("../config/db");
 const { verifyToken, isAdmin } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
+// semua endpoint di admin wajib menggunakan token dan role = admin
+router.use(verifyToken);
+router.use(isAdmin);
+
 // ----- CREATE GURU (ADMIN) -----
 router.post("/guru", async (req, res) => {
   const { nama, email, password, alamat, pendidikan } = req.body;
