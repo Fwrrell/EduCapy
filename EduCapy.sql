@@ -128,3 +128,4 @@ INSERT INTO pendaftaran_item
 (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
 VALUES 
 (1, 1, 1, '2026-06-01', '2026-06-30', '08:00:00', '09:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
+INSERT INTO keahlian VALUES (8, 1);

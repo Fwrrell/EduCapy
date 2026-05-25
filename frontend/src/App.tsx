@@ -13,6 +13,7 @@ import MainPage from "@/pages/MainPages";
 import Jadwal from "@/pages/Jadwal";
 import Register from "@/pages/Register";
 import DashboardPage from "./pages/guru/DashboardPage";
+import Kelas from "./pages/Kelas";
 
 const DashboardLayout = () => {
   return (
@@ -87,6 +88,7 @@ function App() {
           <Route element={<MuridRoute />}>
             <Route path="/MainPage" element={<MainPage />} />
             <Route path="/jadwal" element={<Jadwal />} />
+            <Route path="/cari-kelas" element={<Kelas />} />
           </Route>
 
           {/* guru akses route */}
