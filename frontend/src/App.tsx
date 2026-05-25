@@ -40,6 +40,21 @@ const GuestRoute = () => {
   return <Outlet />;
 };
 
+const MuridRoute = () => {
+  const isAuthenticated = localStorage.getItem("token");
+  const userRole = localStorage.getItem("role");
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (userRole === "guru") {
+    return <Navigate to="/guru" replace />;
+  }
+
+  return <Outlet />;
+};
+
 const TeacherRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
@@ -65,12 +80,14 @@ function App() {
           <Route path="/login" element={<Login />} />
         </Route>
 
-        {/* murid akses route */}
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<Navigate to="/MainPage" replace />} />
 
-          <Route path="/MainPage" element={<MainPage />} />
-          <Route path="/jadwal" element={<Jadwal />} />
+          {/* murid akses route */}
+          <Route element={<MuridRoute />}>
+            <Route path="/MainPage" element={<MainPage />} />
+            <Route path="/jadwal" element={<Jadwal />} />
+          </Route>
 
           {/* guru akses route */}
           <Route element={<TeacherRoute />}>

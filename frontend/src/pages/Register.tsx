@@ -392,7 +392,7 @@ export default function Register() {
             <p className="mt-6 text-center text-sm text-slate-500">
               Sudah punya akun?{" "}
               <span
-                onClick={() => navigate("/lnpogin")}
+                onClick={() => navigate("/login")}
                 className="text-[#406749] font-bold cursor-pointer hover:underline"
               >
                 Masuk di sini.

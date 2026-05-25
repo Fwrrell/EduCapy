@@ -44,9 +44,13 @@ export default function () {
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("role", role);
+      localStorage.setItem("role", data.data.role);
 
-      navigate(role === "guru" ? "/guru" : "/");
+      if (data.data.role === "guru") {
+        navigate("/guru");
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
