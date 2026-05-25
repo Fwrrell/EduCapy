@@ -84,10 +84,23 @@ router.post("/register", async (req, res) => {
 
 // ----- LOGIN USER -----
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ message: "Email dan Password harus diisi!" });
+  }
+
+  let user;
+  if (role === "murid") {
+    user = await Murid.findOne({ where: { email } });
+  } else if (role === "guru") {
+    user = await GPURenderBundle.findOne({ where: { email } });
+  }
+
+  if (!user) {
+    return res
+      .status(401)
+      .json({ message: `Email tidak terdaftar untuk akses sebagai ${role}!` });
   }
 
   try {
