@@ -14,6 +14,7 @@ import Jadwal from "@/pages/Jadwal";
 import Register from "@/pages/Register";
 import DashboardPage from "./pages/guru/DashboardPage";
 import Kelas from "./pages/Kelas";
+import Admin from "./pages/Admin";
 
 const DashboardLayout = () => {
   return (
@@ -27,74 +28,75 @@ const DashboardLayout = () => {
   );
 };
 
-const GuestRoute = () => {
-  const isAuthenticated = localStorage.getItem("token");
+// const GuestRoute = () => {
+//   const isAuthenticated = localStorage.getItem("token");
 
-  if (isAuthenticated) {
-    const userRole = localStorage.getItem("role");
-    // handle ketika role mengakses bukan page nya
-    return (
-      <Navigate to={userRole === "guru" ? "/guru" : "/MainPage"} replace />
-    );
-  }
+//   if (isAuthenticated) {
+//     const userRole = localStorage.getItem("role");
+//     // handle ketika role mengakses bukan page nya
+//     return (
+//       <Navigate to={userRole === "guru" ? "/guru" : "/MainPage"} replace />
+//     );
+//   }
 
-  return <Outlet />;
-};
+//   return <Outlet />;
+// };
 
-const MuridRoute = () => {
-  const isAuthenticated = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+// const MuridRoute = () => {
+//   const isAuthenticated = localStorage.getItem("token");
+//   const userRole = localStorage.getItem("role");
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+//   if (!isAuthenticated) {
+//     return <Navigate to="/login" replace />;
+//   }
 
-  if (userRole === "guru") {
-    return <Navigate to="/guru" replace />;
-  }
+//   if (userRole === "guru") {
+//     return <Navigate to="/guru" replace />;
+//   }
 
-  return <Outlet />;
-};
+//   return <Outlet />;
+// };
 
-const TeacherRoute = () => {
-  const isAuthenticated = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+// const TeacherRoute = () => {
+//   const isAuthenticated = localStorage.getItem("token");
+//   const userRole = localStorage.getItem("role");
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+//   if (!isAuthenticated) {
+//     return <Navigate to="/login" replace />;
+//   }
 
-  if (userRole !== "guru") {
-    return <Navigate to="/MainPage" replace />;
-  }
+//   if (userRole !== "guru") {
+//     return <Navigate to="/MainPage" replace />;
+//   }
 
-  return <Outlet />;
-};
+//   return <Outlet />;
+// };
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* public route */}
-        <Route element={<GuestRoute />}>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-        </Route>
+        {/* <Route element={<GuestRoute />}> */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        {/* </Route> */}
 
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<Navigate to="/MainPage" replace />} />
 
           {/* murid akses route */}
-          <Route element={<MuridRoute />}>
-            <Route path="/MainPage" element={<MainPage />} />
-            <Route path="/jadwal" element={<Jadwal />} />
-            <Route path="/cari-kelas" element={<Kelas />} />
-          </Route>
+          {/* <Route element={<MuridRoute />}> */}
+          <Route path="/MainPage" element={<MainPage />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/jadwal" element={<Jadwal />} />
+          <Route path="/cari-kelas" element={<Kelas />} />
+          {/* </Route> */}
 
           {/* guru akses route */}
-          <Route element={<TeacherRoute />}>
-            <Route path="/guru" element={<DashboardPage />} />
-          </Route>
+          {/* <Route element={<TeacherRoute />}> */}
+          <Route path="/guru" element={<DashboardPage />} />
+          {/* </Route> */}
         </Route>
       </Routes>
     </BrowserRouter>
