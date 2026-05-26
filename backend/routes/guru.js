@@ -70,6 +70,7 @@ router.post("/kesediaan", async (req, res) => {
 
     // bulk insert ke table jadwal
     if (jadwalData.length > 0) {
+      await connection.rollback();
       const insertJadwal = `INSERT INTO jadwal (id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES ?`;
       await connection.query(insertJadwal, [jadwalData]);
     }

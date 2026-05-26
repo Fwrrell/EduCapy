@@ -26,7 +26,7 @@ app.post("/api/register", (req, res) => {
   const { nama, email, password, alamat, jenjang, tingkat } = req.body;
 
   const queryPendidikan =
-    "SELECT Id_pendidikan FROM Pendidikan WHERE jenjang = ? AND tingkat = ?";
+    "SELECT id_pendidikan FROM tingkat_pendidikan WHERE jenjang = ? AND tingkat = ?";
 
   db.query(queryPendidikan, [jenjang, tingkat], (err, resultsPendidikan) => {
     if (err) {
@@ -100,8 +100,8 @@ app.get("/api/guru", (req, res) => {
       GROUP_CONCAT(mp.nama SEPARATOR ', ') AS matapelajaran
     FROM user u
     JOIN guru g ON u.Id_user = g.Id_guru
-    LEFT JOIN keahlian_guru k ON g.Id_guru = k.Id_guru
-    LEFT JOIN matapelajaran mp ON k.Id_mapel = mp.Id_mapel
+    LEFT JOIN keahlian k ON g.Id_guru = k.Id_guru
+    LEFT JOIN mata_pelajaran mp ON k.Id_mapel = mp.Id_mapel
     WHERE u.role = 'guru'
     GROUP BY u.Id_user, u.nama
   `;
