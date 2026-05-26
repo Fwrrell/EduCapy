@@ -431,4 +431,30 @@ router.get("/dashboard", async (req, res) => {
   }
 });
 
+router.get("/keahlian", async (req, res) => {
+  const id_guru = req.user.id_user;
+
+  try {
+    const query = `
+      SELECT mp.nama
+      FROM keahlian k 
+      JOIN guru g on k.id_guru = g.id_guru
+      JOIN mata_pelajaran mp on k.id_mapel = mp.id_mapel
+      WHERE k.id_guru = ?
+    `;
+
+    const [rows] = await db.query(query, [id_guru]);
+
+    const daftarKeahlian = rows.map((row) => row.nama);
+
+    return res.status(200).json({
+      status: "success",
+      data: daftarKeahlian,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+});
+
 module.exports = router;

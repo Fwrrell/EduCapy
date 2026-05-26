@@ -1,5 +1,5 @@
--- CREATE DATABASE IF NOT EXISTS educapy;
--- USE educapy;
+CREATE DATABASE IF NOT EXISTS educapy;
+USE educapy;
 
 DROP TABLE IF EXISTS pendaftaran_item;
 DROP TABLE IF EXISTS pendaftaran;

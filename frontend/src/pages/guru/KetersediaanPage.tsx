@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
@@ -22,6 +22,8 @@ export default function KetersediaanPage() {
   const [endDate, setEndDate] = useState("");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [keahlianData, setKeahlianData] = useState<any | null>(null);
+  const [error, setError] = useState("");
 
   const [days, setDays] = useState([
     {
@@ -91,6 +93,42 @@ export default function KetersediaanPage() {
         ? prev.filter((s) => s !== subjectName)
         : [...prev, subjectName],
     );
+  };
+
+  useEffect(() => {
+    fetchKeahlianData();
+  }, []);
+
+  const fetchKeahlianData = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3000/api/guru/keahlian", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Gagal mengambil data");
+      }
+
+      setKeahlianData(result.data);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -362,38 +400,65 @@ export default function KetersediaanPage() {
                 <h2 className="text-lg font-bold">Keahlian Mengajar</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {subjects.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => toggleSubject(s.name)}
-                    className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group ${
-                      selectedSubjects.includes(s.name)
-                        ? "border-[#406749] bg-[#406749]/5 shadow-sm"
-                        : "border-slate-100 bg-white hover:border-slate-200"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <GraduationCap
-                        size={24}
-                        className={
-                          selectedSubjects.includes(s.name)
-                            ? "text-[#406749]"
-                            : "text-slate-300"
-                        }
-                      />
-                      {selectedSubjects.includes(s.name) && (
-                        <CheckCircle2 size={20} className="text-[#406749]" />
-                      )}
-                    </div>
-                    <span
-                      className={`font-bold ${selectedSubjects.includes(s.name) ? "text-[#406749]" : "text-slate-600"}`}
-                    >
-                      {s.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              {error && (
+                <div className="p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-2">
+                  <AlertCircle size={20} />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {isLoading && !keahlianData ? (
+                <div className="flex items-center justify-center py-8 gap-2 text-[#406749]">
+                  <Loader2 className="animate-spin" size={24} />
+                  <span>Memuat keahlian Anda...</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {keahlianData && keahlianData.length > 0 ? (
+                    keahlianData.map((subjectName: string, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => toggleSubject(subjectName)}
+                        className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group ${
+                          selectedSubjects.includes(subjectName)
+                            ? "border-[#406749] bg-[#406749]/5 shadow-sm"
+                            : "border-slate-100 bg-white hover:border-slate-200"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <GraduationCap
+                            size={24}
+                            className={
+                              selectedSubjects.includes(subjectName)
+                                ? "text-[#406749]"
+                                : "text-slate-300"
+                            }
+                          />
+                          {selectedSubjects.includes(subjectName) && (
+                            <CheckCircle2
+                              size={20}
+                              className="text-[#406749]"
+                            />
+                          )}
+                        </div>
+                        <span
+                          className={`font-bold ${
+                            selectedSubjects.includes(subjectName)
+                              ? "text-[#406749]"
+                              : "text-slate-600"
+                          }`}
+                        >
+                          {subjectName}
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-400 col-span-3 text-center py-4">
+                      Anda belum mendaftarkan keahlian mengajar di profil Anda.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
