@@ -14,6 +14,7 @@ import Jadwal from "@/pages/Jadwal";
 import Register from "@/pages/Register";
 import DashboardPage from "./pages/guru/DashboardPage";
 import Kelas from "./pages/Kelas";
+import KetersediaanPage from "./pages/guru/KetersediaanPage";
 
 const DashboardLayout = () => {
   return (
@@ -94,6 +95,10 @@ function App() {
           {/* guru akses route */}
           <Route element={<TeacherRoute />}>
             <Route path="/guru" element={<DashboardPage />} />
+            <Route
+              path="/guru/ketersediaan-jadwal"
+              element={<KetersediaanPage />}
+            />
           </Route>
         </Route>
       </Routes>
