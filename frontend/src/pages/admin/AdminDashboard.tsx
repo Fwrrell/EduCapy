@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-export default function Admin() {
+export default function MainPage() {
   const [murid, setMurid] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
