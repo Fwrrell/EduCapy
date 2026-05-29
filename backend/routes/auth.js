@@ -102,10 +102,8 @@ router.post("/login", async (req, res) => {
     const user = users[0];
 
     if (user.role !== role) {
-      const cekRole = role === "murid" ? "MURID" : "GURU";
-
       return res.status(401).json({
-        message: `Anda tidak memiliki hak untuk masuk sebagai ${namaRole}!`,
+        message: `Anda tidak memiliki hak untuk masuk sebagai ${role}!`,
       });
     }
 

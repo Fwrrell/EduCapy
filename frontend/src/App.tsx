@@ -12,10 +12,15 @@ import Sidebar from "@/components/sidebar";
 import MainPage from "@/pages/MainPages";
 import Jadwal from "@/pages/Jadwal";
 import Register from "@/pages/Register";
-import DashboardPage from "./pages/guru/DashboardPage";
 import Kelas from "./pages/Kelas";
+
+import DashboardPage from "./pages/guru/DashboardPage";
 import KetersediaanPage from "./pages/guru/KetersediaanPage";
-import Admin from "./pages/Admin";
+
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminLogin from "./pages/admin/AdminLogin";
+import ManajemenMurid from "./pages/admin/ManajemenMurid";
+import ManajemenGuru from "./pages/admin/ManajemenGuru";
 
 const DashboardLayout = () => {
   return (
@@ -35,6 +40,7 @@ const GuestRoute = () => {
   if (isAuthenticated) {
     const userRole = localStorage.getItem("role");
     // handle ketika role mengakses bukan page nya
+    if (userRole === "admin") return <Navigate to="/admin" replace />;
     return (
       <Navigate to={userRole === "guru" ? "/guru" : "/MainPage"} replace />
     );
@@ -55,6 +61,10 @@ const MuridRoute = () => {
     return <Navigate to="/guru" replace />;
   }
 
+  if (userRole === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+
   return <Outlet />;
 };
 
@@ -66,7 +76,26 @@ const TeacherRoute = () => {
     return <Navigate to="/login" replace />;
   }
 
+  if (userRole === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+
   if (userRole !== "guru") {
+    return <Navigate to="/MainPage" replace />;
+  }
+
+  return <Outlet />;
+};
+
+const AdminRoute = () => {
+  const isAuthenticated = localStorage.getItem("token");
+  const userRole = localStorage.getItem("role");
+
+  if (!isAuthenticated) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  if (userRole !== "admin") {
     return <Navigate to="/MainPage" replace />;
   }
 
@@ -78,21 +107,21 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* public route */}
-        {/* <Route element={<GuestRoute />}> */}
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        {/* </Route> */}
+        <Route element={<GuestRoute />}>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+        </Route>
 
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<Navigate to="/MainPage" replace />} />
 
           {/* murid akses route */}
-          {/* <Route element={<MuridRoute />}> */}
-          <Route path="/MainPage" element={<MainPage />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/jadwal" element={<Jadwal />} />
-          <Route path="/cari-kelas" element={<Kelas />} />
-          {/* </Route> */}
+          <Route element={<MuridRoute />}>
+            <Route path="/MainPage" element={<MainPage />} />
+            <Route path="/jadwal" element={<Jadwal />} />
+            <Route path="/cari-kelas" element={<Kelas />} />
+          </Route>
 
           {/* guru akses route */}
           <Route element={<TeacherRoute />}>
@@ -101,6 +130,13 @@ function App() {
               path="/guru/ketersediaan-jadwal"
               element={<KetersediaanPage />}
             />
+          </Route>
+
+          {/* admin akses route */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/manajemen-murid" element={<ManajemenMurid />} />
+            <Route path="/admin/manajemen-guru" element={<ManajemenGuru />} />
           </Route>
         </Route>
       </Routes>

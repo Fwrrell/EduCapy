@@ -87,10 +87,9 @@ router.post("/guru", async (req, res) => {
     connection.release();
   }
 });
+
 router.get("/murid-terdaftar", async (req, res) => {
-  let connection;
   try {
-    connection = await db.getConnection();
     const query = `
         SELECT 
           u.id_user AS id,
@@ -106,16 +105,38 @@ router.get("/murid-terdaftar", async (req, res) => {
         WHERE u.role = 'murid'
         GROUP BY u.id_user, u.nama, tp.tingkat, tp.jenjang
       `;
-    const [results] = await connection.query(query);
+    const [results] = await db.query(query);
 
     res.status(200).json(results);
   } catch (error) {
     console.error("Gagal mengambil data murid:", error);
     res.status(500).json({ error: "Gagal mengambil data murid dari server" });
-  } finally {
-    if (connection) {
-      connection.release();
-    }
+  }
+});
+
+router.get("/guru-terdaftar", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        u.id_user AS id,
+        u.nama,
+        u.email,
+        g.pendidikan,
+        GROUP_CONCAT(mp.nama SEPARATOR ', ') AS keahlian_mapel
+      FROM user u
+      JOIN guru g ON u.id_user = g.id_guru
+      LEFT JOIN keahlian k ON g.id_guru = k.id_guru
+      LEFT JOIN mata_pelajaran mp ON k.id_mapel = mp.id_mapel
+      WHERE u.role = 'guru'
+      GROUP BY u.id_user, u.nama, u.email, g.pendidikan
+    `;
+
+    const [results] = await db.query(query);
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("Gagal mengambil data guru:", error);
+    res.status(500).json({ error: "Gagal mengambil data guru dari server" });
   }
 });
 

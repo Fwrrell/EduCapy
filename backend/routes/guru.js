@@ -70,7 +70,6 @@ router.post("/kesediaan", async (req, res) => {
 
     // bulk insert ke table jadwal
     if (jadwalData.length > 0) {
-      await connection.rollback();
       const insertJadwal = `INSERT INTO jadwal (id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES ?`;
       await connection.query(insertJadwal, [jadwalData]);
     }
@@ -232,7 +231,7 @@ router.get("/murid-aktif", async (req, res) => {
       status: "success",
       data: muridAktif,
     });
-  } catch (error) {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
@@ -313,7 +312,7 @@ router.get("/riwayat-sesi", async (req, res) => {
       },
       data: dataResult,
     });
-  } catch (error) {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
@@ -426,7 +425,7 @@ router.get("/dashboard", async (req, res) => {
       status: "success",
       data: dashboardData,
     });
-  } catch (error) {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }

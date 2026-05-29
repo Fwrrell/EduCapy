@@ -5,15 +5,23 @@ import {
   LayoutDashboard,
   CalendarCheck,
   Compass,
+  Users,
 } from "lucide-react";
 import {
   FaListUl,
   FaRegCircleQuestion,
   FaRegSquareCaretLeft,
 } from "react-icons/fa6";
-import { useState } from "react";
+import { useState, type ElementType } from "react";
 import Logo from "@/assets/logo-educapy 1.png";
 import { NavLink } from "react-router-dom";
+
+type MenuItem = {
+  name: string;
+  path: string;
+  icon: ElementType;
+  badge?: number;
+};
 
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -32,7 +40,7 @@ export default function Sidebar() {
   };
 
   // --- KONFIGURASI MENU MURID ---
-  const menuMurid = [
+  const menuMurid: MenuItem[] = [
     { name: "halaman utama", path: "/MainPage", icon: LayoutDashboard },
     { name: "jadwalku", path: "/jadwal", icon: CalendarDays },
     { name: "cari kelas", path: "/cari-kelas", icon: Compass },
@@ -45,7 +53,7 @@ export default function Sidebar() {
   ];
 
   // --- KONFIGURASI MENU GURU ---
-  const menuGuru = [
+  const menuGuru: MenuItem[] = [
     { name: "halaman utama", path: "/guru", icon: LayoutDashboard },
     {
       name: "ketersediaan jadwal",
@@ -65,8 +73,20 @@ export default function Sidebar() {
     },
   ];
 
+  const menuAdmin: MenuItem[] = [
+    { name: "Manajemen Murid", path: "/admin/manajemen-murid", icon: Users },
+    { name: "Manajemen Guru", path: "/admin/manajemen-guru", icon: Users },
+  ];
+
   // Menu dirender berdasarkan role yang dilocalstorage
-  const currentMenu = userRole === "guru" ? menuGuru : menuMurid;
+  let currentMenu: MenuItem[];
+  if (userRole === "murid") {
+    currentMenu = menuMurid;
+  } else if (userRole === "guru") {
+    currentMenu = menuGuru;
+  } else {
+    currentMenu = menuAdmin;
+  }
 
   return (
     <>
