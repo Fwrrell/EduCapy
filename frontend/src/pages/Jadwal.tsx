@@ -37,7 +37,7 @@ export default function Jadwal() {
     const fetchJadwal = async () => {
       try {
         const response = await fetch(
-          "https://localhost:3000/api/murid/jadwal",
+          "http://localhost:3000/api/murid/jadwalku",
           {
             method: "GET",
             headers: {

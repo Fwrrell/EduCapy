@@ -11,6 +11,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Field, FieldGroup } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 
 // mendefinisikan tipe data sesuai query
 interface Murid {
@@ -26,6 +42,15 @@ export default function ManajemenMurid() {
   const [students, setStudents] = useState<Murid[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    nama: "",
+    email: "",
+    password: "",
+    alamat: "",
+    jenjang: "",
+    tingkat: "",
+  });
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -65,8 +90,36 @@ export default function ManajemenMurid() {
     student.nama?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  const [dataPendidikan, setDataPendidikan] = useState<
+    Array<{
+      [x: string]: any;
+      jenjang: string;
+      tingkat: number;
+    }>
+  >([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/murid/tingkat-pendidikan")
+      .then((res) => res.json())
+      .then((data) => setDataPendidikan(data))
+      .catch((err) => console.error("Gagal mengambil data: ", err));
+  }, []);
+
+  const listJenjang = [...new Set(dataPendidikan.map((item) => item.jenjang))];
+  const listTingkat = dataPendidikan
+    .filter((item) => item.jenjang === formData.jenjang)
+    .map((item) => item.tingkat);
+
+  const handleJenjangChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, jenjang: value, tingkat: "" }));
+  };
+
+  const handleTingkatChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, tingkat: value }));
+  };
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 mx-auto space-y-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -77,10 +130,87 @@ export default function ManajemenMurid() {
             Kelola data dan jumlah kelas yang didaftarkan murid.
           </p>
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Tambah Murid
-        </Button>
+        <Dialog>
+          <form>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Tambah Murid
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Membuat Akun Murid</DialogTitle>
+              </DialogHeader>
+              <FieldGroup>
+                <Field>
+                  <Label htmlFor="name-1">Nama Lengkap</Label>
+                  <Input id="name-1" name="name" value={formData.nama} />
+                </Field>
+                <Field>
+                  <Label htmlFor="name-1">Email</Label>
+                  <Input id="name-1" name="name" value={formData.email} />
+                </Field>
+                <Field>
+                  <Label htmlFor="name-1">Password</Label>
+                  <Input
+                    id="name-1"
+                    name="name"
+                    type="password"
+                    value={formData.password}
+                  />
+                </Field>
+                <Field>
+                  <Label htmlFor="name-1">Alamat</Label>
+                  <Input id="name-1" name="name" value={formData.alamat} />
+                </Field>
+                <Field>
+                  <Label htmlFor="jenjang">Jenjang</Label>
+                  <Select
+                    value={formData.jenjang}
+                    onValueChange={handleJenjangChange}
+                  >
+                    <SelectTrigger id="jenjang" className="w-full">
+                      <SelectValue placeholder="Pilih Jenjang" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {listJenjang.map((jenjang) => (
+                        <SelectItem key={jenjang} value={jenjang}>
+                          {jenjang}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field>
+                  <Label htmlFor="tingkat">Tingkat</Label>
+                  <Select
+                    value={formData.tingkat}
+                    onValueChange={handleTingkatChange}
+                    disabled={!formData.jenjang}
+                  >
+                    <SelectTrigger id="tingkat" className="w-full">
+                      <SelectValue
+                        placeholder={
+                          formData.jenjang
+                            ? "Pilih Tingkat"
+                            : "Pilih jenjang dahulu"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {listTingkat.map((tingkat) => (
+                        <SelectItem key={tingkat} value={String(tingkat)}>
+                          Kelas {tingkat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </FieldGroup>
+            </DialogContent>
+          </form>
+        </Dialog>
       </div>
 
       {/* Toolbar */}
