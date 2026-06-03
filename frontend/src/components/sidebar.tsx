@@ -15,6 +15,7 @@ import {
 import { useState, type ElementType } from "react";
 import Logo from "@/assets/logo-educapy 1.png";
 import { NavLink } from "react-router-dom";
+import { getRoleFromToken } from "@/lib/utils";
 
 type MenuItem = {
   name: string;
@@ -26,8 +27,8 @@ type MenuItem = {
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // ambil role dari localStorage, defaultnya "murid"
-  const userRole = localStorage.getItem("role") || "murid";
+  // ambil role dari payload token
+  const userRole = getRoleFromToken() || "murid";
 
   const getButtonClass = (isActive: boolean) => {
     return `capitalize flex items-center gap-5 w-full text-xl font-medium px-3 py-3 rounded-xl transition-all duration-300 ${

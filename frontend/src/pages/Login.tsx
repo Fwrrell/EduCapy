@@ -44,7 +44,6 @@ export default function () {
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.data.role);
 
       if (data.data.role === "guru") {
         navigate("/guru");

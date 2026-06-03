@@ -55,7 +55,6 @@ export default function AdminLogin() {
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.data.role);
 
       navigate("/admin");
     } catch (err: any) {

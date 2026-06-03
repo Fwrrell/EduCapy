@@ -49,13 +49,7 @@ router.post("/register", async (req, res) => {
     // insert ke table murid
     const insertMurid =
       "INSERT INTO murid (id_murid, id_pendidikan) VALUES (?, ?)";
-    const [muridResult] = await connection.query(insertMurid, [
-      newUserId,
-      id_pendidikan,
-    ]);
-
-    // commit jika transaction berhasil
-    await connection.commit();
+    await connection.query(insertMurid, [newUserId, id_pendidikan]);
 
     // ambil data user yang baru aja register
     const [userData] = await connection.query(
@@ -66,9 +60,18 @@ router.post("/register", async (req, res) => {
    WHERE u.id_user = ?`,
       [newUserId],
     );
+    // generate token
+    const token = jwt.sign(
+      { id_user: newUserId, role: "murid", nama: nama },
+      JWT_SECRET,
+      { expiresIn: "24h" },
+    );
+    // commit jika transaction berhasil
+    await connection.commit();
 
     res.status(201).json({
       message: "Registrasi murid berhasil",
+      token: token,
       data: userData[0],
     });
   } catch (err) {
@@ -113,7 +116,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id_user: user.id_user, role: user.role },
+      { id_user: user.id_user, role: user.role, nama: user.nama },
       JWT_SECRET,
       { expiresIn: "24h" },
     );

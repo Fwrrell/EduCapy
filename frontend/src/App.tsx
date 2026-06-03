@@ -21,6 +21,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
 import ManajemenMurid from "./pages/admin/ManajemenMurid";
 import ManajemenGuru from "./pages/admin/ManajemenGuru";
+import { getRoleFromToken } from "@/lib/utils";
 
 const DashboardLayout = () => {
   return (
@@ -38,7 +39,7 @@ const GuestRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
 
   if (isAuthenticated) {
-    const userRole = localStorage.getItem("role");
+    const userRole = getRoleFromToken();
     // handle ketika role mengakses bukan page nya
     if (userRole === "admin") return <Navigate to="/admin" replace />;
     return (
@@ -51,7 +52,7 @@ const GuestRoute = () => {
 
 const MuridRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  const userRole = getRoleFromToken();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -70,7 +71,7 @@ const MuridRoute = () => {
 
 const TeacherRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  const userRole = getRoleFromToken();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -89,7 +90,7 @@ const TeacherRoute = () => {
 
 const AdminRoute = () => {
   const isAuthenticated = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  const userRole = getRoleFromToken();
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
