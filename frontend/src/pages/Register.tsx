@@ -22,7 +22,7 @@ export default function Register() {
     Array<{
       [x: string]: any;
       jenjang: string;
-      tingkat: string;
+      tingkat: number;
     }>
   >([]);
 
@@ -85,7 +85,7 @@ export default function Register() {
     // cari id jenjang dengan tingkat
     const idPendidikan = dataPendidikan.find(
       (item) =>
-        item.jenjang === formData.jenjang && item.tingkat === formData.tingkat,
+        item.jenjang === formData.jenjang && item.tingkat === numTingkat,
     );
 
     if (!idPendidikan) {
@@ -121,7 +121,7 @@ export default function Register() {
       localStorage.setItem("token", result.token);
 
       alert("Registrasi berhasil");
-      navigate("/app");
+      navigate("/MainPage");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

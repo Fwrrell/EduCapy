@@ -29,23 +29,13 @@ export default function KetersediaanPage() {
     {
       name: "Senin",
       active: true,
-      slots: [{ id: 1, start: "08:00", end: "12:00" }],
-    },
-    { name: "Selasa", active: false, slots: [] },
-    {
-      name: "Rabu",
-      active: true,
       slots: [{ id: 2, start: "08:00", end: "12:00" }],
     },
+    { name: "Selasa", active: false, slots: [] },
+    { name: "Rabu", active: false, slots: [] },
     { name: "Kamis", active: false, slots: [] },
     { name: "Jumat", active: false, slots: [] },
   ]);
-
-  const subjects = [
-    { id: "mat-sd", name: "Matematika SD" },
-    { id: "fis-smp", name: "Fisika SMP" },
-    { id: "kim-sma", name: "Kimia SMA" },
-  ];
 
   const toggleDay = (index: any) => {
     const newDays = [...days];
@@ -131,23 +121,39 @@ export default function KetersediaanPage() {
     }
   };
 
-  const handleSubmit = async () => {
-    // 1. Validasi Input
-    if (!startDate || !endDate) {
-      alert("Harap isi Tanggal Mulai dan Tanggal Selesai!");
-      return setStep(1); // Kembali ke step 1 jika kosong
+  const prevStep = () => {
+    setError("");
+    if (step > 1) {
+      setStep((prev) => prev - 1);
     }
-    if (new Date(startDate) > new Date(endDate)) {
-      alert("Tanggal Selesai tidak boleh lebih awal dari Tanggal Mulai!");
-      return setStep(1);
-    }
+  };
 
-    // 2. Format Data Jadwal Harian sesuai format backend
-    const activeDays = days.filter((d) => d.active && d.slots.length > 0);
-    if (activeDays.length === 0) {
-      alert("Harap aktifkan minimal 1 hari dengan slot jam yang valid!");
-      return setStep(2);
+  const nextStep = () => {
+    setError("");
+
+    if (step === 1) {
+      if (!startDate || !endDate) {
+        setError("Tanggal Mulai dan Tanggal Selesai mengajar harus diisi!");
+        return;
+      }
+      if (new Date(startDate) > new Date(endDate)) {
+        setError("Tanggal Selesai tidak boleh lebih awal dari Tanggal Mulai!");
+        return;
+      }
+      setStep(2);
+    } else if (step === 2) {
+      const activeDays = days.filter((d) => d.active && d.slots.length > 0);
+      if (activeDays.length === 0) {
+        setError("Minimal 1 hari dengan slot jam yang valid!");
+        return;
+      }
+      setStep(3);
     }
+  };
+
+  const handleSubmit = async () => {
+    // 1. Format Data Jadwal Harian sesuai format backend
+    const activeDays = days.filter((d) => d.active && d.slots.length > 0);
 
     const jadwal_harian = activeDays.map((day) => ({
       hari: day.name,
@@ -157,7 +163,7 @@ export default function KetersediaanPage() {
       })),
     }));
 
-    // 3. Susun Payload Akhir
+    // 2. Susun Payload Akhir
     const payload = {
       tanggal_awal: startDate,
       tanggal_akhir: endDate,
@@ -197,7 +203,7 @@ export default function KetersediaanPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 font-sans text-slate-700">
-      <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         {/* Header */}
         <div className="p-8 border-b border-slate-100">
           <h1 className="text-2xl font-bold text-slate-800">
@@ -463,6 +469,12 @@ export default function KetersediaanPage() {
           )}
         </div>
 
+        {error && (
+          <p className="flex justify-end pr-4 pb-2 text-sm font-bold text-red-500">
+            ⚠️ {error}
+          </p>
+        )}
+
         <div className="p-8 bg-slate-50/80 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-6">
             <div className="flex flex-col">
@@ -483,7 +495,7 @@ export default function KetersediaanPage() {
           <div className="flex items-center gap-3 w-full md:w-auto">
             {step > 1 && (
               <button
-                onClick={() => setStep(step - 1)}
+                onClick={prevStep}
                 disabled={isLoading}
                 className="flex-1 md:flex-none px-6 py-3.5 font-bold text-slate-500 hover:bg-slate-100 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
@@ -493,7 +505,7 @@ export default function KetersediaanPage() {
 
             {step < 3 ? (
               <button
-                onClick={() => setStep(step + 1)}
+                onClick={nextStep}
                 className="flex-1 md:flex-none px-8 py-3.5 bg-[#406749] text-white font-bold rounded-2xl hover:bg-[#32523b] shadow-lg shadow-[#406749]/20 transition-all flex items-center justify-center gap-2"
               >
                 Lanjut <ChevronRight size={20} />

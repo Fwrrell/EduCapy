@@ -2,21 +2,23 @@ import { Search, Bell, LogOut } from "lucide-react";
 import logo from "@/assets/logo-educapy 1.png";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getNameFromToken, clearAuth } from "@/lib/utils";
+
 export default function upperMenu() {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("Pengguna");
 
   useEffect(() => {
-    const fullName = localStorage.getItem("userName");
+    const fullName = getNameFromToken();
 
     if (fullName) {
       const namaDepan = fullName.split(" ")[0];
       setFirstName(namaDepan);
     }
   }, []);
+
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userName");
+    clearAuth();
     navigate("/login");
   };
   return (
