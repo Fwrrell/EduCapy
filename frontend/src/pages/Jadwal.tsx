@@ -1,6 +1,6 @@
 import { Timer, FileText, ArrowUpDown } from "lucide-react";
 import { FaRegCircleDot } from "react-icons/fa6";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 const jadwalData = [
   {
     id: 1,
@@ -31,9 +31,33 @@ const jadwalData = [
   },
 ];
 export default function Jadwal() {
+  const token = localStorage.getItem("token");
+  const [jadwal, setJadwal] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchJadwal = async () => {
+      try {
+        const response = await fetch(
+          "https://localhost:3000/api/murid/jadwal",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        const data = await response.json();
+        setJadwal(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchJadwal();
+  }, []);
+
   const [activeTab, setActiveTab] = useState("semua");
   const tabs = ["Semua", "akan datang", "selesai", "dibatalkan"];
-  const filteredData = jadwalData.filter((item) => {
+  const filteredData = jadwal.filter((item) => {
     if (activeTab === "Semua") return true;
     if (activeTab === "Akan Datang")
       return item.status === "besok" || item.status === "hari ini";
@@ -100,31 +124,35 @@ export default function Jadwal() {
         {/* schedule list */}
         <div className="flex flex-1 flex-col items-center gap-3">
           {/* card 1 */}
-          {filteredData.map((kelas) => (
+          {filteredData.map((kelas, index) => (
             <div
-              key={kelas.id}
+              key={index}
               className="flex w-full items-center gap-4 rounded-xl shadow-md p-5"
             >
               <div className="flex flex-1 flex-col gap-1 p-4 border-r-4 border-slate-200">
-                <span className="text-2xl font-bold">{kelas.jam}</span>
-                <span className="text-[#9CA3AF]">{kelas.durasi}</span>
+                <span className="text-2xl font-bold">
+                  {kelas.jam_mulai_kelas?.substring(0, 5)}
+                </span>
+                <span className="text-[#9CA3AF]">
+                  {kelas.jam_selesai_les?.substring(0, 5)}
+                </span>
                 <span className="flex items-center gap-2 rounded-xl bg-[#DCFCE7] p-1">
                   <FaRegCircleDot color="#22C55E" />
                   <span className="text-[#22C55E] font-semibold whitespace-nowrap">
-                    {kelas.status}
+                    {kelas.hari_mengajar}
                   </span>
                 </span>
               </div>
               <div className="w-full flex-2 gap-3 flex flex-col">
                 <div className="flex items-center gap-3">
                   <h3 className="capitalize font-bold text-4xl">
-                    {kelas.judul}
+                    {kelas.nama_mapel}
                   </h3>
                   <span className="capitalize text-[#4B5563] rounded-lg bg-[#E5E7EB] p-2">
-                    {kelas.tingkat}
+                    {kelas.jenjang}-{kelas.tingkat}
                   </span>
                 </div>
-                <p className="text-lg ">{kelas.dosen}</p>
+                <p className="text-lg ">{kelas.nama_guru}</p>
               </div>
               {kelas.status === "besok" && (
                 <div className="flex gap-3 ml-auto">

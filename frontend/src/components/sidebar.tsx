@@ -91,53 +91,56 @@ export default function Sidebar() {
   return (
     <>
       <div
-        className={`flex flex-col text-2xl h-screen p-10 border-r-4 transition-all duration-300 ${
-          isExpanded ? "w-80 px-10" : "w-28 px-4"
+        className={`flex flex-col items-center h-screen py-10 border-r-4 transition-all duration-300 ${
+          isExpanded ? "w-70 px-8" : "w-25 px-4"
         } relative`}
       >
-        <button
-          className="absolute -right-0 top-20 text-[#406749] hover:text-[#606C38] rounded-full z-50 shadow-sm cursor-pointer"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <FaRegSquareCaretLeft
-            className={`w-8 h-8 transition-transform duration-300 ${
-              !isExpanded ? "rotate-180" : ""
+        <div className="flex items-center">
+          {/* HEADER SIDEBAR */}
+          <div
+            className={`flex w-full items-center font-semibold gap-4 shadow-xs mb-5 ${
+              isExpanded ? "" : "justify-center"
             }`}
-          />
-        </button>
-
-        {/* HEADER SIDEBAR */}
-        <div
-          className={`flex w-full items-center font-semibold gap-4 shadow-xs mb-10 ${
-            isExpanded ? "" : "justify-center"
-          }`}
-        >
-          <img
-            src={Logo}
-            alt="logo-educapy"
-            className={`bg-white rounded-full shrink-0 object-cover transition-all duration-300 ${
-              isExpanded ? "w-20 h-20 p-2" : "w-12 h-12 p-1"
-            }`}
-          />
-          {isExpanded && (
-            <div className="flex flex-col justify-center">
-              <p className="text-[#406749] text-2xl font-bold leading-none">
-                EduCapy
-              </p>
-              {/* sub-title khusus untuk role guru */}
-              {userRole === "guru" && (
-                <p className="text-[#4B5563]/60 text-[0.75rem] font-bold tracking-[1.5px] mt-1 uppercase">
-                  Portal Guru
+          >
+            <img
+              src={Logo}
+              alt="logo-educapy"
+              className={`bg-white rounded-full shrink-0 object-cover transition-all duration-300 ${
+                isExpanded ? "w-20 h-20 p-2" : "w-12 h-12 p-1"
+              }`}
+            />
+            {isExpanded && (
+              <div className="flex flex-col justify-center">
+                <p className="text-[#406749] text-2xl font-bold leading-none">
+                  EduCapy
                 </p>
-              )}
-            </div>
-          )}
+                {/* sub-title khusus untuk role guru */}
+                {userRole === "guru" && (
+                  <p className="text-[#4B5563]/60 text-[0.75rem] font-bold tracking-[1.5px] mt-1 uppercase">
+                    Portal Guru
+                  </p>
+                )}
+              </div>
+            )}
+            <button
+              className="text-[#406749] hover:text-[#606C38] rounded-full z-50 shadow-sm cursor-pointer"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              <FaRegSquareCaretLeft
+                className={`w-6 h-6 transition-transform duration-300 ${
+                  !isExpanded ? "rotate-180 w-3 h-3" : ""
+                }`}
+              />
+            </button>
+          </div>
         </div>
 
         {/* MENU UTAMA */}
-        <div className="flex flex-col gap-5">
+        <div
+          className={`flex flex-col ${isExpanded ? "gap-6 w-full" : "gap-8 max-w-15"}`}
+        >
           {isExpanded && (
-            <p className="capitalize text-[#4B5563]/50 tracking-[1.2px] text-[1.2rem] font-bold border-b-2 border-slate-200 pb-2 mb-2">
+            <p className="capitalize text-[#4B5563]/50 tracking-[1.2px] text-lg font-bold border-b-2 border-slate-200 pb-2 mb-2">
               menu utama
             </p>
           )}
@@ -151,13 +154,17 @@ export default function Sidebar() {
                 to={item.path}
                 className={({ isActive }) => getButtonClass(isActive)}
               >
-                <div className="flex items-center gap-5 flex-1 relative">
-                  <IconComponent className="w-7 h-7 min-w-[28px]" />
-                  {isExpanded && <span>{item.name}</span>}
+                <div className="flex items-center gap-4 flex-1 relative">
+                  <IconComponent className="w-6 h-6 min-w-[25px]" />
+                  {isExpanded && (
+                    <span className="text-lg whitespace-nowrap">
+                      {item.name}
+                    </span>
+                  )}
 
                   {/* badge notif */}
                   {item.badge && isExpanded && (
-                    <div className="absolute right-0 bg-[#4B5563] text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                    <div className=" right-0 bg-[#4B5563] text-white text-xs font-bold w-4 h-4 p-3 rounded-full flex items-center justify-center">
                       {item.badge}
                     </div>
                   )}
@@ -168,21 +175,23 @@ export default function Sidebar() {
         </div>
 
         {/* MENU BOTTOM (PENGATURAN & BANTUAN) */}
-        <div className="flex flex-col justify-evenly gap-5 mt-auto">
+        <div
+          className={`flex flex-col justify-evenly w-full mt-auto ${isExpanded ? "gap-6" : "gap-4"}`}
+        >
           <NavLink
             to={userRole === "guru" ? "/guru/pengaturan" : "/pengaturan"}
             className={({ isActive }) => getButtonClass(isActive)}
           >
-            <Settings className="w-7 h-7 min-w-[28px]" />
-            {isExpanded && <span>pengaturan</span>}
+            <Settings className="w-6 h-6 min-w-[25px]" />
+            {isExpanded && <span className="text-lg">pengaturan</span>}
           </NavLink>
 
           <NavLink
             to={userRole === "guru" ? "/guru/bantuan" : "/bantuan"}
             className={({ isActive }) => getButtonClass(isActive)}
           >
-            <FaRegCircleQuestion className="w-7 h-7 min-w-[28px]" />
-            {isExpanded && <span>bantuan</span>}
+            <FaRegCircleQuestion className="w-6 h-6 min-w-[25px]" />
+            {isExpanded && <span className="text-lg">bantuan</span>}
           </NavLink>
         </div>
       </div>
