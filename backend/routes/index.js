@@ -10,5 +10,5 @@ router.use("/auth", authRoutes);
 router.use("/admin", adminRoutes);
 router.use("/guru", guruRoutes);
 router.use("/murid", muridRoutes);
-router.use("/murid/jadwal", jadwalMuridRoutes);
+// router.use("/murid/jadwal", jadwalMuridRoutes);
 module.exports = router;
