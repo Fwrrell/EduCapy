@@ -51,7 +51,7 @@ export default function Kelas() {
             </div>
             <button className="flex items-center p-4 shadow-sm gap-3 rounded-lg">
               <ListFilter color="#1E1E18" className="w-5 h-5" />
-              <span className="font-bold text-xl">Filter </span>
+              <span className="font-bold text-lg">Filter </span>
             </button>
           </div>
         </div>
@@ -90,7 +90,7 @@ export default function Kelas() {
                   </span>
                 </div>
                 <button
-                  className="p-2 capitalize text-lg flex items-center gap-2 font-bold text-[#406749]"
+                  className="p-2 capitalize text-base flex items-center gap-2 font-bold text-[#406749]"
                   onClick={() => setGuruTerpilih(guru)}
                 >
                   lihat jadwal & book
