@@ -105,6 +105,7 @@ CREATE TABLE pendaftaran_item (
 
 INSERT INTO user (nama, role, email, password)
 VALUES ('superadmin', 'admin', 'admin@educapy.com', '$2b$10$/m5cv1mhM4dB3UZrp.b3NeeInMz2JIxrgQq2BpopO.zYgc4Ify.JW');
+
 INSERT INTO tingkat_pendidikan (jenjang, tingkat)
 VALUES
 ('SD', 1),
@@ -121,49 +122,98 @@ VALUES
 ('SMA', 3);
 
 -- DUMMY DATA
-INSERT INTO user (nama, role, email, password, alamat) VALUES 
-('Bapak Budi Santoso', 'guru', 'budi@educapy.com', '12345', 'Jl. Pendidikan No 1'),
-('Prospero Phelix', 'murid', 'prospero@educapy.com', '12345', 'Jl. Merdeka No 45');
+INSERT INTO user(nama,role,email,password) VALUES('John Doe','murid','JohnDoe@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
+INSERT INTO user(nama,role,email,password) VALUES('Agus','guru','Agus@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
+INSERT INTO user(nama,role,email,password) VALUES('Hansel','murid','Hansel@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
+INSERT INTO user(nama,role,email,password) VALUES('Kapi','guru','Kapi@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
+INSERT INTO user(nama,role,email,password) VALUES('Doni','guru','Doni@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.'),('Ivan Kumalala','murid','ivankumalala@gmail.com','');
 
-INSERT INTO guru (id_guru, pendidikan) VALUES (2, 'S1 Pendidikan Matematika');
--- Kita pasangkan murid dengan id_pendidikan = 7 (SMP Kelas 1 dari tingkat_pendidikan)
-INSERT INTO murid (id_murid, id_pendidikan) VALUES (3, 7); 
+-- 2 masukan ke tabel murid menghubungkan id_murid dengan id_pendidikan
+insert into murid(id_murid,id_pendidikan) VALUES(2,10);-- id murid mengikuti id user lihat dlu tabel user 
+insert into murid(id_murid,id_pendidikan) VALUES(4,12);
+INSERT into murid(id_murid,id_pendidikan) VALUES(7,9);
 
--- Buat Mata Pelajaran untuk id_pendidikan = 7
-INSERT INTO mata_pelajaran (id_mapel, id_pendidikan, nama) VALUES (1, 7, 'MATEMATIKA SMP');
+-- 3 masukan data spesifik guru lihat dari tabel user
+INSERT INTO guru(id_guru,pendidikan) VALUES
+(3,"S1 Teknik Informatika , Universitas Katolik Parahyangan"),(5,"S2 Metalurgi Institut Teknologi Bandung");
 
-INSERT INTO keahlian (id_guru, id_mapel) VALUES (2, 1);
+INSERT INTO guru(id_guru,pendidikan) VALUES
+(6,"S1 Ekonomi ,Universitas Indonesia");
+-- id guru bs berbeda jika sempat menghapus user yang lain
 
-INSERT INTO jadwal_kesediaan (id_kesediaan, id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) 
-VALUES (1, 2, 1, '2026-06-01', '2026-12-31');
+-- 4. masukan data mata_pelajaran dengan id pendidikan = di table murid
+INSERT INTO mata_pelajaran (id_pendidikan,nama) VALUES(12,'MATEMATIKA');
+INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (10, 'FISIKA');
+INSERT into mata_pelajaran(id_pendidikan,nama) VALUES (9,'BAHASA INGGRIS');
 
-INSERT INTO jadwal (id_jadwal, id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) 
-VALUES (1, 1, 'Senin', '09:00:00', '10:00:00');
+-- 5. tentukan keahlian Guru lihat dengan tabel guru untuk id guru, tabel mapel dengan id mapel
 
-INSERT INTO pendaftaran (id_daftar, id_murid) VALUES (1, 3);
+INSERT INTO keahlian(id_guru,id_mapel) VALUES
+(3,1),(5,2);
+INSERT INTO keahlian(id_guru,id_mapel) VALUES
+(5,1);
+INSERT INTO keahlian(id_guru,id_mapel) VALUES
+(6,3);
+
+-- 6 masukan jadwal kesediaan guru dengan menggunakan id guru dari tabel guru , id mapel dari tabel mapel
+
+INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
+(3,1,'2026-01-01','2026-01-31'),(6,3,'2026-01-01','2026-01-31'),(3,1,'2026-02-01','2026-03-31');
+INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
+(5,2,'2026-01-01','2026-05-31'),(5,1,'2026-01-01','2026-03-31');
+
+-- 7. masukan jadwal lebih spesifik dari jadwal_kesediaan 
+-- id_kesediaan lihat dlu di jadwal kesediaan
+
+INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
+(1,'Rabu','15:00:00','16:00:00'),(2,'Senin','16:00:00','18:00:00');
+INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
+(3,'Rabu','17:00:00','18:00:00');
+INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
+(4,'Jumat','17:00:00','18:00:00');
+
+INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
+(5,'Senin','11:00:00','12:00:00');
+
+-- 8 insert into Pendaftaran . lihat ke tabel murid id muridnya
+-- lihat id murid yang mau didaftarkan
+
+INSERT INTO pendaftaran(id_murid) VALUES
+(7);
+INSERT INTO pendaftaran(id_murid) VALUES
+(2);
+INSERT INTO pendaftaran(id_murid) VALUES
+(4);
+
+-- 9 insert ke pendaftaran item, id_daftar lihat dari tabel pendaftaran,id jadwal lihat ke tabel jadwal, id mapel lihat ke tabel mapel
+
+SELECT * FROM mata_pelajaran;
+INSERT INTO pendaftaran_item 
+(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
+VALUES 
+(1, 1, 1, '2026-01-01', '2026-01-01', '15:00:00','16:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
+INSERT INTO pendaftaran_item 
+(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
+VALUES 
+(2, 3, 2, '2026-01-01', '2026-01-01', '17:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
 
 INSERT INTO pendaftaran_item 
-(id_pendItem, id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
+(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
 VALUES 
-(1, 1, 1, 1, '2026-06-01', '2026-06-30', '09:00:00', '10:00:00', 'Mendatang', 'Persiapan Ujian Kenaikan Kelas');
+(2, 2, 2, '2026-02-01', '2026-02-01', '17:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
 
-INSERT INTO user(nama, role, email, password, alamat) VALUES
-('Bobi Putra, S.T.', 'guru', 'Bobob@gmail.com', '12345', 'jalan merdeka no. 12'),
-('Rayhan Saputra, S.T.', 'guru', 'rayhan@gmail.com', '12345', 'jalan kopo no. 12'),
-('Jose Jonathan, S.Si.', 'guru', 'jose@gmail.com', '12345', 'jalan ahmad yani no. 12'),
-('rani rigani, S.E.', 'guru', 'rani@gmail.com', '12345', 'jalan merdeka no. 12')
+INSERT INTO pendaftaran_item 
+(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
+VALUES 
+(3, 4, 3, '2026-02-07', '2026-02-21', '17:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
 
-INSERT INTO mata_pelajaran(id_mapel, id_pendidikan, nama) VALUES (2, 12, 'FISIKA SMA'),
-(3, 10, "MATEMATIKA GEOMETRI")
 
-INSERT INTO mata_pelajaran(id_mapel, id_pendidikan, nama) VALUES(4, 8, "KIMIA SMP"), (5, 9, "MATEMATIKA LANJUT"), (6, 11, "FISIKA STRUKTUR"), (7, 11, "akuntansi dasar");
-INSERT INTO guru (id_guru, pendidikan) VALUES(5, 'S1 FISIKA'), ('6', "S2 KIMIA"), (7, 'S1 MATEMATIKA'), (8, 'S2 Ekonomi');
-INSERT INTO keahlian(id_guru, id_mapel) VALUES (5, 6), (6, 4), (7, 5),  (8, 7);
+INSERT INTO pendaftaran_item 
+(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
+VALUES 
+(3, 3, 1, '2026-02-07', '2026-02-08', '17:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
 
-INSERT INTO jadwal_kesediaan (id_kesediaan, id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) 
-VALUES (2, 5, 6, '2026-06-02', '2026-10-31'), (3, 6, 4, '2026-08-15', '2026-11-31'), (4, 7, 5, '2026-10-15', '2026-12-31'), (5, 8, 7, '2026-08-15', '2026-11-31');
-
-INSERT INTO jadwal (id_jadwal, id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) 
-VALUES (2, 2, 'Senin', '09:00:00', '10:00:00'), (3,2, 'Selasa', '09:00:00', '10:00:00'), (4,2, 'Selasa', '10:00:00', '11:00:00'), (5,2, 'Selasa', '13:00:00', '14:00:00'), (6,2, 'Selasa', '17:00:00', '18:00:00'),(7,2, 'Rabu', '09:00:00', '10:00:00'), (8, 3,'Senin', '09:00:00', '10:00:00'), (9, 3, 'Selasa', '08:00:00', '09:00:00'), (10, 3, 'Selasa', '09:00:00', '10:00:00'), (11, 3, 'Selasa', '11:00:00', '12:00:00'),
-(12, 4, 'Selasa', '09:00:00', '10:00:00'), (13, 4, 'Rabu', '09:00:00', '10:00:00'), (14, 4, 'Selasa', '11:00:00', '12:00:00'), (15, 4, 'Kamis', '11:00:00', '12:00:00');
-
+INSERT INTO pendaftaran_item 
+(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
+VALUES 
+(2, 2, 2, '2026-02-07', '2026-02-21', '16:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');

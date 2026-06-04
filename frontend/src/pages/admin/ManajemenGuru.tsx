@@ -46,10 +46,6 @@ export default function ManajemenGuru() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorSubmmitting, setErrorSubmitting] = useState("");
-
   const [formData, setFormData] = useState({
     nama: "",
     email: "",
@@ -100,7 +96,7 @@ export default function ManajemenGuru() {
   );
 
   return (
-    <div className="pt-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 mx-auto space-y-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
