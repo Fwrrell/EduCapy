@@ -18,7 +18,8 @@ CREATE TABLE user (
     role ENUM('admin', 'guru', 'murid') NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    alamat TEXT
+    alamat TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE tingkat_pendidikan (
@@ -46,6 +47,7 @@ CREATE TABLE mata_pelajaran (
     id_mapel INT AUTO_INCREMENT PRIMARY KEY,
     id_pendidikan INT,
     nama VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     Foreign Key (id_pendidikan) REFERENCES tingkat_pendidikan(id_pendidikan)
 );
@@ -65,6 +67,7 @@ CREATE TABLE jadwal_kesediaan (
     id_mapel INT,
     tanggal_awal_bersedia DATE,
     tanggal_akhir_bersedia DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     Foreign Key (id_guru) REFERENCES guru(id_guru)
 );
@@ -75,6 +78,7 @@ CREATE TABLE jadwal (
     hari_mengajar ENUM('Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu') NOT NULL,
     jam_mulai TIME NOT NULL,
     jam_selesai TIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     Foreign Key (id_kesediaan) REFERENCES jadwal_kesediaan(id_kesediaan) ON DELETE CASCADE
 );
@@ -97,6 +101,7 @@ CREATE TABLE pendaftaran_item (
     jam_selesai_les TIME NOT NULL,
     status ENUM('Mendatang', 'Selesai', 'Batal'),
     catatan TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     Foreign Key (id_daftar) REFERENCES pendaftaran(id_daftar) ON DELETE CASCADE,
     Foreign Key (id_jadwal) REFERENCES jadwal(id_jadwal) ON DELETE CASCADE,

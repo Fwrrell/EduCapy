@@ -158,4 +158,123 @@ router.get("/mata-pelajaran", async (req, res) => {
   }
 });
 
+router.get("/dashboard", async (req, res) => {
+  try {
+    const sqlSesiMendatang = `
+      SELECT 
+        COUNT(id_penditem) AS sesi_mendatang 
+      FROM pendaftaran_item 
+      WHERE status = 'Mendatang' AND tanggal_mulai >= CURDATE();
+    `;
+
+    const sqlPelajaran = `
+      SELECT 
+        COUNT(id_mapel) AS total_pelajaran 
+      FROM mata_pelajaran;
+    `;
+
+    const sqlTopMapel = `
+      SELECT 
+          mp.nama AS mapel_terfavorit, 
+          COUNT(pi.id_penditem) AS total_diambil
+      FROM pendaftaran_item pi
+      JOIN mata_pelajaran mp ON pi.id_mapel = mp.id_mapel
+      GROUP BY pi.id_mapel
+      ORDER BY total_diambil DESC
+      LIMIT 1;
+    `;
+
+    const sqlSumJamGuru = `
+      SELECT 
+          COALESCE(SUM(TIMESTAMPDIFF(MINUTE, j.jam_mulai, j.jam_selesai)) / 60, 0) AS kapasitas_jam_per_minggu
+      FROM jadwal j
+      JOIN jadwal_kesediaan jk ON j.id_kesediaan = jk.id_kesediaan
+      WHERE CURDATE() BETWEEN jk.tanggal_awal_bersedia AND jk.tanggal_akhir_bersedia;
+    `;
+
+    const sqlRecentPendaftaran = `
+      SELECT 
+        pi.id_penditem, 
+        u_murid.nama AS nama_murid, 
+        u_guru.nama AS nama_guru, 
+        mp.nama AS nama_mapel,
+        pi.created_at
+      FROM pendaftaran_item pi
+      JOIN pendaftaran p ON pi.id_daftar = p.id_daftar
+      JOIN user u_murid ON p.id_murid = u_murid.id_user
+      JOIN jadwal j ON pi.id_jadwal = j.id_jadwal
+      JOIN jadwal_kesediaan jk ON j.id_kesediaan = jk.id_kesediaan
+      JOIN user u_guru ON jk.id_guru = u_guru.id_user
+      JOIN mata_pelajaran mp ON pi.id_mapel = mp.id_mapel
+      ORDER BY pi.id_penditem DESC 
+      LIMIT 5
+    `;
+
+    const sqlGuruDaftar = `
+      SELECT 
+        id_user, 
+        nama, 
+        email,
+        created_at
+      FROM user 
+      WHERE role = 'guru' 
+      ORDER BY id_user DESC 
+      LIMIT 5
+    `;
+
+    const sqlMuridDaftar = `
+      SELECT 
+        id_user, 
+        nama, 
+        email,
+        created_at
+      FROM user 
+      WHERE role = 'murid' 
+      ORDER BY id_user DESC 
+      LIMIT 5
+    `;
+
+    const [
+      [sesiMendatangResult],
+      [pelajaranResult],
+      [topMapelResult],
+      [banyakJamResult],
+      [pendaftaraanTerbaru],
+      [guruBaruResult],
+      [muridBaruResult],
+    ] = await Promise.all([
+      db.query(sqlSesiMendatang),
+      db.query(sqlPelajaran),
+      db.query(sqlTopMapel),
+      db.query(sqlSumJamGuru),
+      db.query(sqlRecentPendaftaran),
+      db.query(sqlGuruDaftar),
+      db.query(sqlMuridDaftar),
+    ]);
+
+    const dashboardData = {
+      statistik: {
+        sesi_mendatang: sesiMendatangResult[0].sesi_mendatang,
+        total_pelajaran: pelajaranResult[0].total_pelajaran,
+        mapel_terfavorit:
+          topMapelResult.length > 0 ? topMapelResult[0].mapel_terfavorit : "-",
+        jam_tersedia: parseFloat(banyakJamResult[0].kapasitas_jam_per_minggu),
+      },
+      log_aktivitas: {
+        pendaftaran: pendaftaraanTerbaru,
+        guru_baru: guruBaruResult,
+        murid_baru: muridBaruResult,
+      },
+    };
+
+    res.status(200).json({
+      status: "success",
+      data: dashboardData,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+});
+
 module.exports = router;
