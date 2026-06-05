@@ -1,8 +1,18 @@
 import { useState, useEffect } from "react";
-import { Search, Plus, Edit, Trash2, Loader2, BookOpen } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Loader2,
+  BookOpen,
+  Check,
+  ChevronsUpDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -23,14 +33,18 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 interface Guru {
   id: number;
@@ -52,40 +66,55 @@ export default function ManajemenGuru() {
     password: "",
     alamat: "",
     pendidikan: "",
-    keahlian: [] as any[],
   });
 
-  //   const listMapel = await fetch("h ttp://localhost:3000/api/guru/keahlian");
+  const [dataKeahlian, setDataKeahlian] = useState<any[]>([]);
+  const [selectedKeahlian, setSelectedKeahlian] = useState<number[]>([]);
+
+  const toggleKeahlian = (id: number) => {
+    setSelectedKeahlian((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const fetchTeachers = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        "http://localhost:3000/api/admin/guru-terdaftar",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Gagal mengambil data. Pastikan Anda login sebagai Admin.",
+        );
+      }
+
+      const data = await response.json();
+      setTeachers(data);
+    } catch (err: any) {
+      console.error("Error fetching data guru:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTeachers = async () => {
-      setIsLoading(true);
-      setError("");
-
-      try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/guru-terdaftar",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          },
-        );
-        if (!response.ok) {
-          throw new Error(
-            "Gagal mengambil data. Pastikan Anda login sebagai Admin.",
-          );
-        }
-
-        const data = await response.json();
-        setTeachers(data);
-      } catch (err: any) {
-        console.error("Error fetching data murid:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchTeachers();
   }, []);
 
@@ -94,6 +123,78 @@ export default function ManajemenGuru() {
       teacher.nama?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       teacher.email?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  useEffect(() => {
+    const fetchKeahlian = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          "http://localhost:3000/api/admin/mata-pelajaran",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data keahlian.");
+        }
+
+        const result = await response.json();
+        setDataKeahlian(result.data);
+      } catch (err) {
+        console.log("Error fetching data keahlian: ", err);
+      }
+    };
+    fetchKeahlian();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const payload = {
+        ...formData,
+        keahlian: selectedKeahlian,
+      };
+
+      const response = await fetch("http://localhost:3000/api/admin/guru", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Gagal mendaftarkan guru");
+      }
+
+      alert("Guru berhasil didaftarkan!");
+      setFormData({
+        nama: "",
+        email: "",
+        password: "",
+        alamat: "",
+        pendidikan: "",
+      });
+      setSelectedKeahlian([]);
+      fetchTeachers(); // Refresh list
+    } catch (err: any) {
+      setError(err.message);
+      alert("Error: " + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="p-8 mx-auto space-y-6">
@@ -108,75 +209,149 @@ export default function ManajemenGuru() {
           </p>
         </div>
         <Dialog>
-          <form>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2 cursor-pointer">
-                <Plus className="w-4 h-4" />
-                Tambah Guru
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-sm">
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2 cursor-pointer">
+              <Plus className="w-4 h-4" />
+              Tambah Guru
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle>Membuat Akun Guru</DialogTitle>
               </DialogHeader>
-              <FieldGroup>
+              <div className="space-y-4 py-4">
                 <Field>
-                  <Label htmlFor="name-1">Nama Lengkap</Label>
-                  <Input id="name-1" name="name" value={formData.nama} />
-                </Field>
-                <Field>
-                  <Label htmlFor="name-1">Email</Label>
-                  <Input id="name-1" name="name" value={formData.email} />
-                </Field>
-                <Field>
-                  <Label htmlFor="name-1">Password</Label>
+                  <Label htmlFor="nama">Nama Lengkap</Label>
                   <Input
-                    id="name-1"
-                    type="password"
-                    name="name"
-                    value={formData.password}
+                    id="nama"
+                    name="nama"
+                    value={formData.nama}
+                    onChange={handleInputChange}
+                    required
                   />
                 </Field>
                 <Field>
-                  <Label htmlFor="name-1">Alamat</Label>
-                  <Input id="name-1" name="name" value={formData.alamat} />
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                  />
                 </Field>
                 <Field>
-                  <Label htmlFor="name-1">Pendidikan</Label>
+                  <Label htmlFor="password">Password</Label>
                   <Input
-                    id="name-1"
-                    name="name"
+                    id="password"
+                    name="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Label htmlFor="alamat">Alamat</Label>
+                  <Input
+                    id="alamat"
+                    name="alamat"
+                    value={formData.alamat}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Label htmlFor="pendidikan">Pendidikan</Label>
+                  <Input
+                    id="pendidikan"
+                    name="pendidikan"
                     placeholder="S1 Teknik Mesin - Institut Teknologi Bandung"
                     value={formData.pendidikan}
+                    onChange={handleInputChange}
+                    required
                   />
                 </Field>
                 <Field>
-                  <Label htmlFor="name=1">Keahlian</Label>
-                  <Select>
-                    <SelectTrigger className="w-full max-w-48">
-                      <SelectValue placeholder="Select a fruit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Mata Pelajaran</SelectLabel>
-                        <SelectItem value="apple">Apple</SelectItem>
-                        <SelectItem value="banana">Banana</SelectItem>
-                        <SelectItem value="blueberry">Blueberry</SelectItem>
-                        <SelectItem value="grapes">Grapes</SelectItem>
-                        <SelectItem value="pineapple">Pineapple</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="keahlian">Keahlian (Bisa pilih banyak)</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-between h-auto min-h-10 px-3 py-2 text-left font-normal"
+                      >
+                        <div className="flex flex-wrap gap-1">
+                          {selectedKeahlian.length > 0 ? (
+                            selectedKeahlian.map((id) => (
+                              <Badge
+                                key={id}
+                                variant="secondary"
+                                className="font-normal"
+                              >
+                                {dataKeahlian.find((k) => k.id === id)?.nama}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-muted-foreground">
+                              Pilih keahlian...
+                            </span>
+                          )}
+                        </div>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Cari mata pelajaran..." />
+                        <CommandEmpty>Mapel tidak ditemukan.</CommandEmpty>
+                        <CommandList>
+                          <CommandGroup>
+                            {dataKeahlian.map((item) => (
+                              <CommandItem
+                                key={item.id}
+                                onSelect={() => toggleKeahlian(item.id)}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedKeahlian.includes(item.id)
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {item.nama}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </Field>
-              </FieldGroup>
+              </div>
+              {error && (
+                <p className="text-sm font-bold text-red-500">⚠️ {error}</p>
+              )}
               <DialogFooter>
                 <DialogClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DialogClose>
-                <Button type="submit">Save changes</Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save changes"
+                  )}
+                </Button>
               </DialogFooter>
-            </DialogContent>
-          </form>
+            </form>
+          </DialogContent>
         </Dialog>
       </div>
 
@@ -186,7 +361,7 @@ export default function ManajemenGuru() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Cari nama atau email guru..."
+            placeholder="Cari nama atau email guru"
             className="pl-9 w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
