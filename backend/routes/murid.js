@@ -135,6 +135,7 @@ router.get("/jadwalku", verifyToken, async (req, res) => {
                     j.hari_mengajar, 
                     pi.jam_mulai_les, 
                     pi.jam_selesai_les, 
+                    pi.status,
                     tp.jenjang,
                     tp.tingkat
                 FROM pendaftaran_item pi
@@ -155,4 +156,39 @@ router.get("/jadwalku", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/riwayat-kelas", verifyToken, async (req, res) => {
+  const idMurid = req.user.id_user;
+  const query = `SELECT
+                    u.nama AS nama_guru,
+                    mp.nama AS mata_pelajaran,
+                    tp.jenjang,
+                    pi.tanggal_mulai,
+                    pi.tanggal_selesai,
+                    pi.jam_mulai_les,
+                    pi.jam_selesai_les,
+                    j.hari_mengajar,
+                    TIMESTAMPDIFF(HOUR, pi.jam_mulai_les, pi.jam_selesai_les) AS jam_per_pertemuan,
+      
+                    FLOOR(DATEDIFF(pi.tanggal_selesai, pi.tanggal_mulai) / 7) + 1 AS jumlah_pertemuan,
+      
+                    (FLOOR(DATEDIFF(pi.tanggal_selesai, pi.tanggal_mulai) / 7) + 1) * TIMESTAMPDIFF(HOUR, pi.jam_mulai_les, pi.jam_selesai_les) AS total_sesi
+                    FROM pendaftaran_item pi
+                    JOIN jadwal j ON pi.id_jadwal = j.id_jadwal
+                    JOIN jadwal_kesediaan jk ON jk.id_kesediaan = j.id_kesediaan
+                    JOIN guru g ON g.id_guru = jk.id_guru
+                    JOIN user u ON u.id_user=g.id_guru
+                    JOIN pendaftaran p ON p.id_daftar=pi.id_daftar
+                    JOIN mata_pelajaran mp ON mp.id_mapel = pi.id_mapel
+                    JOIN tingkat_pendidikan tp ON tp.id_pendidikan=mp.id_pendidikan
+                    WHERE p.id_murid = ?`;
+  try {
+    const [results] = await db.query(query, [idMurid]);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("Gagal mengambil riwayat kelas:", error);
+    return res
+      .status(500)
+      .json({ error: "Gagal mengambil data riwayat kelas" });
+  }
+});
 module.exports = router;

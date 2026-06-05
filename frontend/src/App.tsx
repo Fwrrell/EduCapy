@@ -13,7 +13,7 @@ import MainPage from "@/pages/MainPages";
 import Jadwal from "@/pages/Jadwal";
 import Register from "@/pages/Register";
 import Kelas from "./pages/Kelas";
-
+import RiwayatKelas from "./pages/RiwayatKelas";
 import DashboardPage from "./pages/guru/DashboardPage";
 import KetersediaanPage from "./pages/guru/KetersediaanPage";
 
@@ -122,6 +122,7 @@ function App() {
             <Route path="/MainPage" element={<MainPage />} />
             <Route path="/jadwal" element={<Jadwal />} />
             <Route path="/cari-kelas" element={<Kelas />} />
+            <Route path="/riwayat-kelas" element={<RiwayatKelas />} />
           </Route>
 
           {/* guru akses route */}

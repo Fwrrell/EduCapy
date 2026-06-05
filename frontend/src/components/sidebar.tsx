@@ -46,8 +46,8 @@ export default function Sidebar() {
     { name: "jadwalku", path: "/jadwal", icon: CalendarDays },
     { name: "cari kelas", path: "/cari-kelas", icon: Compass },
     {
-      name: "daftar booking",
-      path: "/daftar-booking",
+      name: "riwayat kelas",
+      path: "/riwayat-kelas",
       icon: FaListUl,
       badge: 2,
     },
