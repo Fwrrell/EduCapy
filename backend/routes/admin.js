@@ -140,4 +140,22 @@ router.get("/guru-terdaftar", async (req, res) => {
   }
 });
 
+router.get("/mata-pelajaran", async (req, res) => {
+  try {
+    const query = `SELECT id_mapel AS id, nama FROM mata_pelajaran`;
+
+    const [rows] = await db.query(query);
+
+    return res.status(200).json({
+      status: "success",
+      data: rows,
+    });
+  } catch (error) {
+    console.error("Gagal mengambil data mata pelajara: ", error);
+    res
+      .status(500)
+      .json({ error: "Gagal mengambil data mata pelajaran dari server" });
+  }
+});
+
 module.exports = router;
