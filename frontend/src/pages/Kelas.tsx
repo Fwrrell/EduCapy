@@ -76,7 +76,7 @@ export default function Kelas() {
                 {guru.mata_pelajaran.map((mapel: string, index: number) => (
                   <div
                     key={index}
-                    className="rounded-xl bg-[#C6E8C8]/30 text-[#406749] p-2 font-semibold capitalize"
+                    className="rounded-xl bg-[#C6E8C8]/30 text-[#406749] text-sm p-2 font-semibold capitalize"
                   >
                     {mapel}
                   </div>
@@ -85,12 +85,12 @@ export default function Kelas() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="rounded-full w-3 h-3 bg-[#22C55E]"></div>
-                  <span className="capitalize text-[#424942] font-normal tracking-wide">
+                  <span className="capitalize text-[#424942] font-normal text-sm tracking-wide">
                     tersedia hari ini
                   </span>
                 </div>
                 <button
-                  className="p-2 capitalize text-base flex items-center gap-2 font-bold text-[#406749]"
+                  className="p-2 capitalize text-sm flex items-center gap-2 font-bold text-[#406749]"
                   onClick={() => setGuruTerpilih(guru)}
                 >
                   lihat jadwal & book
