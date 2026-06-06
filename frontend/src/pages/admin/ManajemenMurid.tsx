@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/table";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -52,36 +54,38 @@ export default function ManajemenMurid() {
     tingkat: "",
   });
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      setIsLoading(true);
-      setError("");
+  const fetchStudents = async () => {
+    setIsLoading(true);
+    setError("");
 
-      try {
-        const response = await fetch(
-          "http://localhost:3000/api/admin/murid-terdaftar",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        "http://localhost:3000/api/admin/murid-terdaftar",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Gagal mengambil data. Pastikan Anda login sebagai Admin.",
         );
-
-        if (!response.ok) {
-          throw new Error(
-            "Gagal mengambil data. Pastikan Anda login sebagai Admin.",
-          );
-        }
-
-        const data = await response.json();
-        setStudents(data);
-      } catch (err: any) {
-        console.error("Error fetching data murid:", error);
-      } finally {
-        setIsLoading(false);
       }
-    };
 
+      const data = await response.json();
+      setStudents(data);
+    } catch (err: any) {
+      console.error("Error fetching data murid:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStudents();
   }, []);
 
@@ -118,6 +122,64 @@ export default function ManajemenMurid() {
     setFormData((prev) => ({ ...prev, tingkat: value }));
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const selectedPendidikan = dataPendidikan.find(
+        (p) =>
+          p.jenjang === formData.jenjang &&
+          String(p.tingkat) === formData.tingkat,
+      );
+
+      if (!selectedPendidikan) {
+        throw new Error("Tingkat pendidikan tidak valid.");
+      }
+
+      const payload = {
+        ...formData,
+        id_pendidikan: selectedPendidikan.id_pendidikan,
+      };
+
+      const response = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Gagal mendaftarkan murid");
+      }
+
+      alert("Murid berhasil didaftarkan!");
+      setFormData({
+        nama: "",
+        email: "",
+        password: "",
+        alamat: "",
+        jenjang: "",
+        tingkat: "",
+      });
+      fetchStudents();
+    } catch (err: any) {
+      setError(err.message);
+      alert("Error: " + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="p-8 mx-auto space-y-6">
       {/* Header Section */}
@@ -131,44 +193,66 @@ export default function ManajemenMurid() {
           </p>
         </div>
         <Dialog>
-          <form>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Tambah Murid
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-sm">
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2 cursor-pointer">
+              <Plus className="w-4 h-4" />
+              Tambah Murid
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-sm">
+            <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle>Membuat Akun Murid</DialogTitle>
               </DialogHeader>
-              <FieldGroup>
+              <div className="space-y-4 py-4">
                 <Field>
-                  <Label htmlFor="name-1">Nama Lengkap</Label>
-                  <Input id="name-1" name="name" value={formData.nama} />
-                </Field>
-                <Field>
-                  <Label htmlFor="name-1">Email</Label>
-                  <Input id="name-1" name="name" value={formData.email} />
-                </Field>
-                <Field>
-                  <Label htmlFor="name-1">Password</Label>
+                  <Label htmlFor="nama">Nama Lengkap</Label>
                   <Input
-                    id="name-1"
-                    name="name"
-                    type="password"
-                    value={formData.password}
+                    id="nama"
+                    name="nama"
+                    value={formData.nama}
+                    onChange={handleInputChange}
+                    required
                   />
                 </Field>
                 <Field>
-                  <Label htmlFor="name-1">Alamat</Label>
-                  <Input id="name-1" name="name" value={formData.alamat} />
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Label htmlFor="alamat">Alamat</Label>
+                  <Input
+                    id="alamat"
+                    name="alamat"
+                    value={formData.alamat}
+                    onChange={handleInputChange}
+                    required
+                  />
                 </Field>
                 <Field>
                   <Label htmlFor="jenjang">Jenjang</Label>
                   <Select
+                    name="jenjang"
                     value={formData.jenjang}
                     onValueChange={handleJenjangChange}
+                    required
                   >
                     <SelectTrigger id="jenjang" className="w-full">
                       <SelectValue placeholder="Pilih Jenjang" />
@@ -185,9 +269,11 @@ export default function ManajemenMurid() {
                 <Field>
                   <Label htmlFor="tingkat">Tingkat</Label>
                   <Select
+                    name="tingkat"
                     value={formData.tingkat}
                     onValueChange={handleTingkatChange}
                     disabled={!formData.jenjang}
+                    required
                   >
                     <SelectTrigger id="tingkat" className="w-full">
                       <SelectValue
@@ -207,9 +293,33 @@ export default function ManajemenMurid() {
                     </SelectContent>
                   </Select>
                 </Field>
-              </FieldGroup>
-            </DialogContent>
-          </form>
+              </div>
+              {error && (
+                <p className="text-sm font-bold text-red-500">⚠️ {error}</p>
+              )}
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline" className="cursor-pointer">
+                    Batalkan
+                  </Button>
+                </DialogClose>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="cursor-pointer"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                      Saving...
+                    </>
+                  ) : (
+                    "Submit"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
         </Dialog>
       </div>
 
