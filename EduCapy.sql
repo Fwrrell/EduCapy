@@ -131,12 +131,14 @@ INSERT INTO user(nama,role,email,password) VALUES('John Doe','murid','JohnDoe@gm
 INSERT INTO user(nama,role,email,password) VALUES('Agus','guru','Agus@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
 INSERT INTO user(nama,role,email,password) VALUES('Hansel','murid','Hansel@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
 INSERT INTO user(nama,role,email,password) VALUES('Kapi','guru','Kapi@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
-INSERT INTO user(nama,role,email,password) VALUES('Doni','guru','Doni@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.'),('Ivan Kumalala','murid','ivankumalala@gmail.com','');
+INSERT INTO user(nama,role,email,password) VALUES('Doni','guru','Doni@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.'),
+                                                 ('Ivan Kumalala','murid','ivankumalala@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
 
 -- 2 masukan ke tabel murid menghubungkan id_murid dengan id_pendidikan
 insert into murid(id_murid,id_pendidikan) VALUES(2,10);-- id murid mengikuti id user lihat dlu tabel user 
 insert into murid(id_murid,id_pendidikan) VALUES(4,12);
 INSERT into murid(id_murid,id_pendidikan) VALUES(7,9);
+
 
 -- 3 masukan data spesifik guru lihat dari tabel user
 INSERT INTO guru(id_guru,pendidikan) VALUES
@@ -147,38 +149,73 @@ INSERT INTO guru(id_guru,pendidikan) VALUES
 -- id guru bs berbeda jika sempat menghapus user yang lain
 
 -- 4. masukan data mata_pelajaran dengan id pendidikan = di table murid
+
 INSERT INTO mata_pelajaran (id_pendidikan,nama) VALUES(12,'MATEMATIKA');
 INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (10, 'FISIKA');
 INSERT into mata_pelajaran(id_pendidikan,nama) VALUES (9,'BAHASA INGGRIS');
+INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (12, 'KIMIA');   -- Mapel SMA 3
+INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (11, 'BIOLOGI'); -- Mapel SMA 2
+INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (12, 'EKONOMI'); -- Mapel SMA 3
 
--- 5. tentukan keahlian Guru lihat dengan tabel guru untuk id guru, tabel mapel dengan id mapel
 
-INSERT INTO keahlian(id_guru,id_mapel) VALUES
-(3,1),(5,2);
-INSERT INTO keahlian(id_guru,id_mapel) VALUES
-(5,1);
-INSERT INTO keahlian(id_guru,id_mapel) VALUES
-(6,3);
+
+
+-- 5. KEAHLIAN GURU 
+
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (3,1); -- Agus - Matematika
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (5,2); -- Kapi - Fisika
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (5,1); -- Kapi - Matematika
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (6,3); -- Doni - Bahasa Inggris
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (3,4); -- Agus - Kimia
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (3,6); -- Agus - Ekonomi
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (5,4); -- Kapi - Kimia
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (5,5); -- Kapi - Biologi
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (6,5); -- Doni - Biologi
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (6,6); -- Doni - Ekonomi
+INSERT INTO keahlian(id_guru,id_mapel) VALUES (6,2); -- Doni - Fisika
+
+
+
+
+
 
 -- 6 masukan jadwal kesediaan guru dengan menggunakan id guru dari tabel guru , id mapel dari tabel mapel
+-- Jadwal Kesediaan Asli (ID Kesediaan 1 s.d 5)
+INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
+(3,1,'2026-06-01','2026-07-31'),  -- ID 1: Agus - Matematika
+(6,3,'2026-06-01','2026-07-31'),  -- ID 2: Doni - B.Inggris
+(5,2,'2026-06-01','2026-07-31'),  -- ID 3: Kapi - Fisika
+(3,4,'2026-06-01','2026-07-31'),  -- ID 4: Agus - Kimia
+(3,6,'2026-06-01','2026-07-31'),  -- ID 5: Agus - Ekonomi
+(5,4,'2026-06-01','2026-07-31'),  -- ID 6: Kapi - Kimia
+(5,5,'2026-06-01','2026-07-31'),  -- ID 7: Kapi - Biologi
+(6,5,'2026-06-01','2026-07-31'),  -- ID 8: Doni - Biologi
+(6,6,'2026-06-01','2026-07-31');  -- ID 9: Doni - Ekonomi
 
-INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
-(3,1,'2026-01-01','2026-01-31'),(6,3,'2026-01-01','2026-01-31'),(3,1,'2026-02-01','2026-03-31');
-INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
-(5,2,'2026-01-01','2026-05-31'),(5,1,'2026-01-01','2026-03-31');
+
 
 -- 7. masukan jadwal lebih spesifik dari jadwal_kesediaan 
 -- id_kesediaan lihat dlu di jadwal kesediaan
 
 INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
-(1,'Rabu','15:00:00','16:00:00'),(2,'Senin','16:00:00','18:00:00');
-INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
-(3,'Rabu','17:00:00','18:00:00');
-INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
-(4,'Jumat','17:00:00','18:00:00');
+(1,'Rabu','15:00:00','16:00:00'),   -- ID 1
+(1,'Senin','14:00:00','16:00:00'),  -- ID 2
+(2,'Senin','16:00:00','18:00:00'),  -- ID 3
+(2,'Jumat','16:00:00','18:00:00'),  -- ID 4
+(3,'Jumat','17:00:00','18:00:00'),  -- ID 5
+(3,'Rabu','13:00:00','15:00:00'),   -- ID 6 (Hari biasa untuk Fisika)
+(3,'Kamis','13:00:00','15:00:00'),  -- ID 7 (Untuk slot 11 Juni)   semuanya punya KAPI
+(3,'Sabtu','08:00:00','10:00:00'),  -- ID 8 (Untuk slot 6 & 13 Juni)
+(4,'Senin','08:00:00','10:00:00'),  -- ID 9
+(4,'Selasa','10:00:00','12:00:00'), -- ID 10
+(5,'Selasa','09:00:00','11:00:00'), -- ID 11
+(5,'Sabtu','11:00:00','13:00:00'),  -- ID 12
+(6,'Rabu','10:00:00','12:00:00'),   -- ID 13
+(7,'Kamis','13:00:00','15:00:00'),  -- ID 14
+(7,'Kamis','15:00:00','17:00:00'),  -- ID 15
+(8,'Jumat','14:00:00','16:00:00'),  -- ID 16
+(9,'Sabtu','08:00:00','10:00:00');  -- ID 17
 
-INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
-(5,'Senin','11:00:00','12:00:00');
 
 -- 8 insert into Pendaftaran . lihat ke tabel murid id muridnya
 -- lihat id murid yang mau didaftarkan
@@ -192,33 +229,19 @@ INSERT INTO pendaftaran(id_murid) VALUES
 
 -- 9 insert ke pendaftaran item, id_daftar lihat dari tabel pendaftaran,id jadwal lihat ke tabel jadwal, id mapel lihat ke tabel mapel
 
-SELECT * FROM mata_pelajaran;
-INSERT INTO pendaftaran_item 
-(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
-VALUES 
-(1, 1, 1, '2026-01-01', '2026-01-01', '15:00:00','16:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
-INSERT INTO pendaftaran_item 
-(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
-VALUES 
-(2, 3, 2, '2026-01-01', '2026-01-01', '17:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
+SELECT * FROM pendaftaran_item;
 
-INSERT INTO pendaftaran_item 
-(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
-VALUES 
-(2, 2, 2, '2026-02-01', '2026-02-01', '17:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
+INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan) VALUES 
+(1, 1, 1, '2026-06-03', '2026-06-03', '15:00:00','16:00:00', 'Selesai', 'Materi Logaritma Dasar - Selesai dilaksanakan'),
+(2, 2, 1, '2026-06-01', '2026-06-01', '14:00:00','16:00:00', 'Selesai', 'Pembahasan PR Aljabar - Selesai'),
+(1, 8, 2, '2026-06-06', '2026-06-06', '08:00:00','10:00:00', 'Selesai', 'John Doe - Teori Kinetik Gas (Sesi Hari Ini Pagi - SELESAI)'),
 
-INSERT INTO pendaftaran_item 
-(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
-VALUES 
-(3, 4, 3, '2026-02-07', '2026-02-21', '17:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
+(2, 6, 2, '2026-06-01', '2026-07-31', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Reguler Juni-Juli)'), -- STATUS: MENDATANG (Sesi masa depan, termasuk request tanggal 11 & 13 Juni Anda)
+(2, 7, 2, '2026-06-11', '2026-06-11', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Khusus Kamis 11 Juni)'),
+(2, 8, 2, '2026-06-13', '2026-06-13', '08:00:00', '10:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Khusus Sabtu 13 Juni)'),
+(1, 9, 4, '2026-06-15', '2026-07-31', '08:00:00', '10:00:00', 'Mendatang', 'Ivan - Les Privat Kimia Intensif'),
+(3, 4, 3, '2026-06-12', '2026-07-31', '16:00:00', '18:00:00', 'Mendatang', 'Hansel - English Academic Reading'),
 
+(1, 10, 4, '2026-06-02', '2026-06-02', '10:00:00', '12:00:00', 'Batal', 'Ivan - Praktikum Kimia (Dibatalkan karena guru sakit)'), -- STATUS: BATAL (Contoh kelas yang di-cancel)
+(3, 12, 6, '2026-06-06', '2026-06-06', '11:00:00', '13:00:00', 'Batal', 'Hansel - Studi Kasus Pasar Modal (Murid izin acara keluarga)');
 
-INSERT INTO pendaftaran_item 
-(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
-VALUES 
-(3, 3, 1, '2026-02-07', '2026-02-08', '17:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
-
-INSERT INTO pendaftaran_item 
-(id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan)
-VALUES 
-(2, 2, 2, '2026-02-07', '2026-02-21', '16:00:00','18:00:00', 'Mendatang', 'Persiapan Ujian Tengah Semester');
