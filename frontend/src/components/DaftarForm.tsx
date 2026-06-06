@@ -371,7 +371,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
           <div className="border-t border-dashed border-slate-300 pt-6 mt-2 flex flex-col gap-4 bg-white">
             <button
               onClick={handleSubmitBooking}
-              disabled={isLoading}
+              disabled={isLoading || intersection === "none"}
               className="w-full bg-[#406749] hover:bg-[#32523b] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
             >
               {isLoading ? "Memproses..." : "Simpan ke Daftar Booking"}
