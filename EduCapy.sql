@@ -237,7 +237,7 @@ INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tan
 (1, 8, 2, '2026-06-06', '2026-06-06', '08:00:00','10:00:00', 'Selesai', 'John Doe - Teori Kinetik Gas (Sesi Hari Ini Pagi - SELESAI)'),
 
 (2, 6, 2, '2026-06-01', '2026-07-31', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Reguler Juni-Juli)'), -- STATUS: MENDATANG (Sesi masa depan, termasuk request tanggal 11 & 13 Juni Anda)
-(2, 7, 2, '2026-06-11', '2026-06-11', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Khusus Kamis 11 Juni)'),
+(2, 7, 2, '2026-06-12', '2026-06-12', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Khusus Kamis 11 Juni)'),
 (2, 8, 2, '2026-06-13', '2026-06-13', '08:00:00', '10:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Khusus Sabtu 13 Juni)'),
 (1, 9, 4, '2026-06-15', '2026-07-31', '08:00:00', '10:00:00', 'Mendatang', 'Ivan - Les Privat Kimia Intensif'),
 (3, 4, 3, '2026-06-12', '2026-07-31', '16:00:00', '18:00:00', 'Mendatang', 'Hansel - English Academic Reading'),
