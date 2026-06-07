@@ -1,7 +1,9 @@
 import { GraduationCap, Timer, CalendarClock, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getNameFromToken } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 export default function MainPages() {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("Pengguna");
 
   useEffect(() => {
@@ -33,31 +35,69 @@ export default function MainPages() {
         console.error(error);
       }
     };
+    if (token) {
+      fetchJadwal();
+    }
+  }, [token]);
+  const urutanHari: { [key: string]: number } = {
+    SENIN: 1,
+    SELASA: 2,
+    RABU: 3,
+    KAMIS: 4,
+    JUMAT: 5,
+    SABTU: 6,
+    MINGGU: 7,
+  };
+
+  const jadwalTerurut = [...jadwal].sort((a, b) => {
+    const hariA = (a.hari_mengajar || "").toUpperCase();
+    const hariB = (b.hari_mengajar || "").toUpperCase();
+    return urutanHari[hariA] - urutanHari[hariB];
+  });
+  const kelasAktif = jadwalTerurut.filter((kelas) => {
+    const hariIni = new Date();
+    hariIni.setHours(0, 0, 0, 0);
+
+    const tujuhHariKedepan = new Date();
+    tujuhHariKedepan.setDate(hariIni.getDate() + 7);
+    tujuhHariKedepan.setHours(23, 59, 59, 999);
+
+    const tglMulai = new Date(kelas.tanggal_mulai);
+    const tglSelesai = new Date(kelas.tanggal_selesai);
+
+    // LOGIKA:
+    // 1. Kelas tidak batal
+    // 2. Kontrak kelas belum berakhir (tanggal_selesai >= hari ini)
+    // 3. Tanggal mulai kontrak tidak lebih dari 7 hari ke depan
+    return (
+      kelas.status !== "Batal" &&
+      tglSelesai >= hariIni &&
+      tglMulai <= tujuhHariKedepan
+    );
   });
   return (
     <>
-      <div className="flex flex-col gap-10 p-10 w-full ">
+      <div className="flex flex-col gap-10 p-10 w-full max-w-full overflow-x-hidden">
         {/* card 1 welcome */}
         <div className="flex justify-between items-center bg-white rounded-2xl shadow-md p-10">
           <div className="">
-            <h1 className="text-[3.5rem] font-bold">
-              Selamat Datang, {firstName}!
-            </h1>
-            <p className="text-[1.5rem] font-normal">
-              Mau belajar apa hari ini?
-            </p>
+            <h1 className="text-4xl font-bold">Selamat Datang, {firstName}!</h1>
+            <p className="text-2xl font-normal">Mau belajar apa hari ini?</p>
           </div>
           <div className="">
-            <button className="rounded-xl bg-[#406749] p-5 flex items-center gap-3 text-white capitalize font-bold cursor-pointer">
+            <button
+              onClick={() => navigate("/cari-kelas")}
+              className="rounded-xl bg-[#406749] p-5 flex items-center gap-3 text-white capitalize font-bold cursor-pointer"
+            >
               <GraduationCap className="w-6 h-6 " />
               <span>daftar kelas baru</span>
             </button>
           </div>
         </div>
         {/* card 2 statistic */}
-        <div className="flex gap-6 w-full justify-between items-center">
+        <div className="flex gap-6 xl:flex-wrap max-w-full justify-between items-center">
           {/* total hours */}
-          <div className="rounded-2xl shadow-md flex-1 flex items-center p-8 gap-6 bg-white min-w-max">
+          <div className="rounded-2xl shadow-md flex-1 flex items-center p-5 gap-6 bg-white ">
             <div className="rounded-full p-3 bg-[#8FB996] shrink-0">
               <Timer className="w-8 h-8" color="#244A2F" />
             </div>
@@ -66,16 +106,16 @@ export default function MainPages() {
                 total jam belajar
               </h4>
               <p className="flex items-baseline gap-2">
-                <span className="font-extrabold text-3xl text-slate-800">
+                <span className="font-extrabold md:text-2xl xl:text-3xl text-slate-800">
                   42.5
                 </span>
                 <span className="font-medium text-lg text-slate-500">jam</span>
               </p>
             </div>
           </div>
-          <div className="rounded-2xl shadow-md flex flex-1 items-center p-8 gap-6 bg-white min-w-max">
+          <div className="rounded-2xl shadow-md flex flex-1 items-center p-5 gap-6 bg-white ">
             <div className="rounded-full p-3 bg-[#FEBF89] shrink-0">
-              <CalendarClock className="w-12 h-12" color="#794C20" />
+              <CalendarClock className="w-8 h-8" color="#794C20" />
             </div>
             <div className="flex flex-col">
               <h4 className="uppercase font-semibold text-md text-[#424942] tracking-wider whitespace-nowrap">
@@ -89,7 +129,7 @@ export default function MainPages() {
               </p>
             </div>
           </div>
-          <div className="rounded-2xl shadow-md flex flex-1 items-center p-8 gap-6 bg-white min-w-max">
+          <div className="rounded-2xl shadow-md flex flex-1 items-center p-5 gap-6 bg-white ">
             <div className="rounded-full p-4 bg-[#CBAD3C] shrink-0">
               <BookOpen className="w-8 h-8" color="#504100" />
             </div>
@@ -120,63 +160,39 @@ export default function MainPages() {
             </button>
           </div>
           {/* card list */}
-          <div className="border border-[#DDE4E6] flex justify-between items-center bg-white p-10 rounded-2xl">
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <div className="bg-[#8FB996] text-[#244A2F] rounded-xl p-2">
-                  09:00 - 11:30
+          {kelasAktif.length > 0 ? (
+            kelasAktif.map((kelas, index) => (
+              <div
+                key={index}
+                className="border border-[#DDE4E6] flex justify-between items-center bg-white p-10 rounded-2xl"
+              >
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <div className="bg-[#8FB996] text-[#244A2F] font-semibold rounded-xl p-2">
+                      {kelas.jam_mulai_les.substring(0, 5)} -{" "}
+                      {kelas.jam_selesai_les.substring(0, 5)}
+                    </div>
+                    <div className="bg-[#C9EBCB] text-[#04210D] font-semibold rounded-xl p-2">
+                      {kelas.nama_mapel}
+                    </div>
+                  </div>
+                  <h4 className="font-bold capitalize text-2xl">
+                    {kelas.nama_guru}
+                  </h4>
+                  <p className="capitalize font-semibold">
+                    {kelas.jenjang} {kelas.tingkat} • {kelas.nama_mapel}
+                  </p>
                 </div>
-                <div className="bg-[#C9EBCB] text-[#04210D] rounded-xl p-2">
-                  Matematika
-                </div>
+                <span className="bg-[#406749] text-white rounded-2xl capitalize p-4 font-semibold cursor-pointer">
+                  {kelas.status}
+                </span>
               </div>
-              <h4 className="font-bold capitalize text-2xl">Budi Santoso</h4>
-              <p className="capitalize font-semibold">
-                kelas 10 SMA • persiapan ujian
-              </p>
-            </div>
-            <button className="bg-[#406749] text-white rounded-2xl capitalize p-4 font-semibold cursor-pointer">
-              hari ini
-            </button>
-          </div>
-          <div className="border border-[#DDE4E6] flex justify-between items-center bg-white p-10 rounded-2xl">
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <div className="bg-[#8FB996] text-[#244A2F] rounded-xl p-2">
-                  09:00 - 11:30
-                </div>
-                <div className="bg-[#C9EBCB] text-[#04210D] rounded-xl p-2">
-                  Matematika
-                </div>
-              </div>
-              <h4 className="font-bold capitalize text-2xl">Budi Santoso</h4>
-              <p className="capitalize font-semibold">
-                kelas 10 SMA • persiapan ujian
-              </p>
-            </div>
-            <button className="bg-[#406749] text-white rounded-2xl capitalize p-4 font-semibold cursor-pointer">
-              hari ini
-            </button>
-          </div>
-          <div className="border border-[#DDE4E6] flex justify-between items-center bg-white p-10 rounded-2xl ">
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <div className="bg-[#8FB996] text-[#244A2F] rounded-xl p-2">
-                  09:00 - 11:30
-                </div>
-                <div className="bg-[#C9EBCB] text-[#04210D] rounded-xl p-2">
-                  Matematika
-                </div>
-              </div>
-              <h4 className="font-bold capitalize text-2xl">Budi Santoso</h4>
-              <p className="capitalize font-semibold">
-                kelas 10 SMA • persiapan ujian
-              </p>
-            </div>
-            <button className="bg-[#406749] text-white rounded-2xl capitalize p-4 font-semibold cursor-pointer">
-              hari ini
-            </button>
-          </div>
+            ))
+          ) : (
+            <p className="text-center text-slate-400 p-10">
+              Tidak ada kelas aktif saat ini.
+            </p>
+          )}
         </div>
       </div>
     </>

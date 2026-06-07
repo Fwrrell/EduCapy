@@ -42,7 +42,6 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
       name: "riwayat kelas",
       path: "/riwayat-kelas",
       icon: FaListUl,
-      // badge: 2,
     },
   ];
 
@@ -102,8 +101,8 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
   return (
     <>
       <div
-        className={`flex flex-col items-center h-screen py-2 border-r-1 transition-all duration-300 bg-[#F7F7F7] overflow-hidden ${
-          isExpanded ? "w-64 px-4" : "w-0 px-0 border-r-0"
+        className={`flex flex-col items-center h-screen border-r-4 transition-all duration-300 ${
+          isExpanded ? "w-70 px-8 py-3" : "w-25 py-6"
         } relative`}
       >
         <div className="flex items-center w-full">
@@ -171,7 +170,9 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
                 to={item.path}
                 className={({ isActive }) => getButtonClass(isActive)}
               >
-                <div className="flex items-center gap-4 flex-1 relative">
+                <div
+                  className={`flex items-center gap-4 w-full ${!isExpanded ? "justify-center" : ""}`}
+                >
                   <IconComponent className="w-5 h-5 min-w-[25px]" />
                   {isExpanded && (
                     <span className="text-base font-semibold capitalize whitespace-nowrap">
@@ -193,13 +194,15 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
 
         {/* MENU BOTTOM (PENGATURAN & BANTUAN) */}
         <div
-          className={`flex flex-col justify-evenly w-full mt-auto ${isExpanded ? "gap-2" : "gap-4"}`}
+          className={`flex flex-col justify-evenly w-full mt-auto ${isExpanded ? "gap-2" : "gap-6"}`}
         >
           <NavLink
             to={userRole === "guru" ? "/guru/pengaturan" : "/pengaturan"}
             className={({ isActive }) => getButtonClass(isActive)}
           >
-            <div className="flex items-center gap-4 flex-1 relative">
+            <div
+              className={`flex items-center gap-4 w-full ${!isExpanded ? "justify-center" : ""}`}
+            >
               <Settings className="w-6 h-6 min-w-[25px]" />
               {isExpanded && (
                 <span className="text-base font-semibold capitalize whitespace-nowrap">
@@ -213,7 +216,9 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
             to={userRole === "guru" ? "/guru/bantuan" : "/bantuan"}
             className={({ isActive }) => getButtonClass(isActive)}
           >
-            <div className="flex items-center gap-4 flex-1 relative">
+            <div
+              className={`flex items-center gap-4 w-full ${!isExpanded ? "justify-center" : ""}`}
+            >
               <FaRegCircleQuestion className="w-6 h-6 min-w-[25px]" />
               {isExpanded && (
                 <span className="text-base font-semibold capitalize whitespace-nowrap">
