@@ -231,17 +231,21 @@ INSERT INTO pendaftaran(id_murid) VALUES
 
 SELECT * FROM pendaftaran_item;
 
-INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan) VALUES 
-(1, 1, 1, '2026-06-03', '2026-06-03', '15:00:00','16:00:00', 'Selesai', 'Materi Logaritma Dasar - Selesai dilaksanakan'),
-(2, 2, 1, '2026-06-01', '2026-06-01', '14:00:00','16:00:00', 'Selesai', 'Pembahasan PR Aljabar - Selesai'),
-(1, 8, 2, '2026-06-06', '2026-06-06', '08:00:00','10:00:00', 'Selesai', 'John Doe - Teori Kinetik Gas (Sesi Hari Ini Pagi - SELESAI)'),
+INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan) 
+VALUES 
 
-(2, 6, 2, '2026-06-01', '2026-07-31', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Reguler Juni-Juli)'), -- STATUS: MENDATANG (Sesi masa depan, termasuk request tanggal 11 & 13 Juni Anda)
-(2, 7, 2, '2026-06-12', '2026-06-12', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Khusus Kamis 11 Juni)'),
-(2, 8, 2, '2026-06-13', '2026-06-13', '08:00:00', '10:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Khusus Sabtu 13 Juni)'),
-(1, 9, 4, '2026-06-15', '2026-07-31', '08:00:00', '10:00:00', 'Mendatang', 'Ivan - Les Privat Kimia Intensif'),
-(3, 4, 3, '2026-06-12', '2026-07-31', '16:00:00', '18:00:00', 'Mendatang', 'Hansel - English Academic Reading'),
 
-(1, 10, 4, '2026-06-02', '2026-06-02', '10:00:00', '12:00:00', 'Batal', 'Ivan - Praktikum Kimia (Dibatalkan karena guru sakit)'), -- STATUS: BATAL (Contoh kelas yang di-cancel)
-(3, 12, 6, '2026-06-06', '2026-06-06', '11:00:00', '13:00:00', 'Batal', 'Hansel - Studi Kasus Pasar Modal (Murid izin acara keluarga)');
+(1, 3, 3, '2026-06-03', '2026-06-03', '16:00:00', '18:00:00', 'Selesai','Ivan - Pelatihan Dasar Grammar - SELESAI'),           -- === STATUS: SELESAI ===   -- ID_DAFTAR 1 | IVAN (SMP 3)  | Mapel: B.INGGRIS (ID 3)  | Jadwal ID 3
+(3, 2, 1, '2026-06-01', '2026-06-01', '14:00:00', '16:00:00', 'Selesai', 'Hansel - Pembahasan PR Kalkulus - SELESAI'),             -- ID_DAFTAR 3 | HANSEL (SMA 3)| Mapel: MATEMATIKA (ID 1) | Jadwal ID 2
+(2, 8, 2, '2026-06-06', '2026-06-06', '08:00:00', '10:00:00', 'Selesai', 'John Doe - Teori Kinetik Gas (Sesi Pagi - SELESAI)'),    -- ID_DAFTAR 2 | JOHN (SMA 1)  | Mapel: FISIKA (ID 2)     | Jadwal ID 8
 
+
+(2, 6, 2, '2026-06-01', '2026-07-31', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Reguler Juni-Juli)'),   -- === STATUS: MENDATANG ===    -- ID_DAFTAR 2 | JOHN (SMA 1)  | Mapel: FISIKA (ID 2)     | Jadwal ID 6
+(2, 7, 2, '2026-06-11', '2026-06-11', '13:00:00', '15:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Kamis 11 Juni)'),     -- ID_DAFTAR 2 | JOHN (SMA 1)  | Mapel: FISIKA (ID 2)     | Jadwal ID 7
+(2, 8, 2, '2026-06-13', '2026-06-13', '08:00:00', '10:00:00', 'Mendatang', 'John Doe - Teori Kinetik Gas (Sesi Sabtu 13 Juni)'),     -- ID_DAFTAR 2 | JOHN (SMA 1)  | Mapel: FISIKA (ID 2)     | Jadwal ID 8
+(3, 9, 4, '2026-06-15', '2026-07-31', '08:00:00', '10:00:00', 'Mendatang', 'Hansel - Les Privat Kimia Organik'),                     -- ID_DAFTAR 3 | HANSEL (SMA 3)| Mapel: KIMIA (ID 4)      | Jadwal ID 9
+(1, 4, 3, '2026-06-12', '2026-07-31', '16:00:00', '18:00:00', 'Mendatang', 'Ivan - English Academic Reading & Conversation'),       -- ID_DAFTAR 1 | IVAN (SMP 3)  | Mapel: B.INGGRIS (ID 3)  | Jadwal ID 4
+
+
+(3, 10, 4, '2026-06-02', '2026-06-02', '10:00:00', '12:00:00', 'Batal','Hansel - Praktikum Kimia (Dibatalkan karena guru sakit)'), -- === STATUS: BATAL === -- ID_DAFTAR 3 | HANSEL (SMA 3)| Mapel: KIMIA (ID 4)      | Jadwal ID 10
+(3, 12, 6, '2026-06-06', '2026-06-06', '11:00:00', '13:00:00', 'Batal', 'Hansel - Akuntansi Makro (Murid izin acara keluarga)');  -- ID_DAFTAR 3 | HANSEL (SMA 3)| Mapel: EKONOMI (ID 6)    | Jadwal ID 12
