@@ -55,11 +55,11 @@ export default function Kelas() {
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-6 ">
           {daftarGuru.map((guru) => (
             <div
               key={guru.id}
-              className="rounded-xl p-5 gap-6 bg-[#FFFF] flex flex-col max-w-xl"
+              className="rounded-xl p-5 gap-6 bg-[#FFFF] flex flex-col max-w-xl shadow-md"
             >
               <div className="flex items-center justify-evenly gap-8">
                 <div className="rounded-full bg-[#A67C52]/10 w-12 h-12"></div>

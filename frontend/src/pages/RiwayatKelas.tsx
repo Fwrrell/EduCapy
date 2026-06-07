@@ -5,10 +5,12 @@ import {
   TriangleAlert,
   TrashIcon,
 } from "lucide-react";
+import DetailSesi from "../components/DetailSesi";
 import { useState, useEffect } from "react";
 export default function RiwayatKelas() {
   const token = localStorage.getItem("token");
   const [riwayat, setRiwayat] = useState<any[]>([]);
+  const [selectedKelas, setSelectedKelas] = useState<any>(null);
   useEffect(() => {
     const fetchJadwal = async () => {
       try {
@@ -119,7 +121,10 @@ export default function RiwayatKelas() {
                     (Dilewati)
                   </div>
 
-                  <button className="text-[#2D6A4F] font-bold text-sm hover:underline hover:text-[#1e4a36] transition-colors cursor-pointer">
+                  <button
+                    onClick={() => setSelectedKelas(kelas)}
+                    className="text-[#2D6A4F] font-bold text-sm hover:underline hover:text-[#1e4a36] transition-colors cursor-pointer"
+                  >
                     Lihat Detail Sesi
                   </button>
                 </div>
@@ -127,6 +132,14 @@ export default function RiwayatKelas() {
             ))
           )}
         </div>
+        {selectedKelas &&
+          console.log("Modal mencoba muncul dengan data:", selectedKelas)}
+        {selectedKelas && (
+          <DetailSesi
+            kelas={selectedKelas}
+            onClose={() => setSelectedKelas(null)}
+          />
+        )}
       </div>
     </>
   );
