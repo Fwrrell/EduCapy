@@ -6,13 +6,14 @@ import {
   CalendarCheck,
   Compass,
   Users,
+  Book,
 } from "lucide-react";
 import {
   FaListUl,
   FaRegCircleQuestion,
   FaRegSquareCaretLeft,
 } from "react-icons/fa6";
-import { useState, type ElementType } from "react";
+import { type ElementType } from "react";
 import Logo from "@/assets/logo-educapy 1.png";
 import { NavLink } from "react-router-dom";
 import { getRoleFromToken } from "@/lib/utils";
@@ -24,21 +25,13 @@ type MenuItem = {
   badge?: number;
 };
 
-export default function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(true);
+interface SidebarProps {
+  isExpanded: boolean;
+}
 
+export default function Sidebar({ isExpanded }: SidebarProps) {
   // ambil role dari payload token
   const userRole = getRoleFromToken() || "murid";
-
-  const getButtonClass = (isActive: boolean) => {
-    return `capitalize flex items-center gap-5 w-full text-xl font-medium px-3 py-3 rounded-xl transition-all duration-300 ${
-      isExpanded ? "px-5 gap-5" : "justify-center px-0"
-    } ${
-      isActive
-        ? "bg-[#606C38]/20 text-[#406749]"
-        : "text-[#4B5563] hover:bg-[#606C38]/10 hover:text-[#406749]"
-    }`;
-  };
 
   // --- KONFIGURASI MENU MURID ---
   const menuMurid: MenuItem[] = [
@@ -74,9 +67,16 @@ export default function Sidebar() {
     },
   ];
 
+  // --- KONFIGURASI MENU ADMIN ---
   const menuAdmin: MenuItem[] = [
+    { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
     { name: "Manajemen Murid", path: "/admin/manajemen-murid", icon: Users },
     { name: "Manajemen Guru", path: "/admin/manajemen-guru", icon: Users },
+    {
+      name: "Manajemen Pelajaran",
+      path: "/admin/manajemen-pelajaran",
+      icon: Book,
+    },
   ];
 
   // Menu dirender berdasarkan role yang dilocalstorage
@@ -89,17 +89,27 @@ export default function Sidebar() {
     currentMenu = menuAdmin;
   }
 
+  const getButtonClass = (isActive: boolean) => {
+    return `w-full transition-all duration-300 rounded-xl ${
+      isExpanded ? "px-2 py-3" : "py-3 flex justify-center"
+    } ${
+      isActive
+        ? "bg-[#606C38]/20 text-[#406749]"
+        : "text-[#4B5563] hover:bg-[#606C38]/10 hover:text-[#406749]"
+    }`;
+  };
+
   return (
     <>
       <div
-        className={`flex flex-col items-center h-screen py-10 border-r-4 transition-all duration-300 ${
-          isExpanded ? "w-70 px-8" : "w-25 px-4"
+        className={`flex flex-col items-center h-screen py-2 border-r-1 transition-all duration-300 bg-[#F7F7F7] overflow-hidden ${
+          isExpanded ? "w-64 px-4" : "w-0 px-0 border-r-0"
         } relative`}
       >
-        <div className="flex items-center">
+        <div className="flex items-center w-full">
           {/* HEADER SIDEBAR */}
           <div
-            className={`flex w-full items-center font-semibold gap-4 shadow-xs mb-5 ${
+            className={`flex w-full items-center font-semibold gap-4 mb-5 ${
               isExpanded ? "" : "justify-center"
             }`}
           >
@@ -107,11 +117,11 @@ export default function Sidebar() {
               src={Logo}
               alt="logo-educapy"
               className={`bg-white rounded-full shrink-0 object-cover transition-all duration-300 ${
-                isExpanded ? "w-20 h-20 p-2" : "w-12 h-12 p-1"
+                isExpanded ? "w-16 h-16 p-2" : "w-0 h-0 p-0 opacity-0"
               }`}
             />
             {isExpanded && (
-              <div className="flex flex-col justify-center">
+              <div className="flex flex-col justify-center whitespace-nowrap">
                 <p className="text-[#406749] text-2xl font-bold leading-none">
                   EduCapy
                 </p>
@@ -121,9 +131,15 @@ export default function Sidebar() {
                     Portal Guru
                   </p>
                 )}
+                {/* sub-title khusus untuk role guru */}
+                {userRole === "admin" && (
+                  <p className="text-[#4B5563]/60 text-[0.75rem] font-bold tracking-[1.5px] mt-1 uppercase">
+                    Portal Admin
+                  </p>
+                )}
               </div>
             )}
-            <button
+            {/* <button
               className="text-[#406749] hover:text-[#606C38] rounded-full z-50 shadow-sm cursor-pointer"
               onClick={() => setIsExpanded(!isExpanded)}
             >
@@ -132,16 +148,16 @@ export default function Sidebar() {
                   !isExpanded ? "rotate-180 w-3 h-3" : ""
                 }`}
               />
-            </button>
+            </button> */}
           </div>
         </div>
 
         {/* MENU UTAMA */}
         <div
-          className={`flex flex-col ${isExpanded ? "gap-6 w-full" : "gap-8 max-w-15"}`}
+          className={`flex flex-col w-full ${isExpanded ? "gap-2" : "gap-8 max-w-15"}`}
         >
           {isExpanded && (
-            <p className="capitalize text-[#4B5563]/50 tracking-[1.2px] text-lg font-bold border-b-2 border-slate-200 pb-2 mb-2">
+            <p className="capitalize text-[#4B5563]/50 tracking-[1.2px] text-sm font-bold border-b-2 border-slate-100 pb-2 mb-2 mt-2">
               menu utama
             </p>
           )}
@@ -156,16 +172,16 @@ export default function Sidebar() {
                 className={({ isActive }) => getButtonClass(isActive)}
               >
                 <div className="flex items-center gap-4 flex-1 relative">
-                  <IconComponent className="w-6 h-6 min-w-[25px]" />
+                  <IconComponent className="w-5 h-5 min-w-[25px]" />
                   {isExpanded && (
-                    <span className="text-lg whitespace-nowrap">
+                    <span className="text-base font-semibold capitalize whitespace-nowrap">
                       {item.name}
                     </span>
                   )}
 
                   {/* badge notif */}
                   {item.badge && isExpanded && (
-                    <div className=" right-0 bg-[#4B5563] text-white text-xs font-bold w-4 h-4 p-3 rounded-full flex items-center justify-center">
+                    <div className="absolute right-0 bg-[#4B5563] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
                       {item.badge}
                     </div>
                   )}
@@ -177,22 +193,34 @@ export default function Sidebar() {
 
         {/* MENU BOTTOM (PENGATURAN & BANTUAN) */}
         <div
-          className={`flex flex-col justify-evenly w-full mt-auto ${isExpanded ? "gap-6" : "gap-4"}`}
+          className={`flex flex-col justify-evenly w-full mt-auto ${isExpanded ? "gap-2" : "gap-4"}`}
         >
           <NavLink
             to={userRole === "guru" ? "/guru/pengaturan" : "/pengaturan"}
             className={({ isActive }) => getButtonClass(isActive)}
           >
-            <Settings className="w-6 h-6 min-w-[25px]" />
-            {isExpanded && <span className="text-lg">pengaturan</span>}
+            <div className="flex items-center gap-4 flex-1 relative">
+              <Settings className="w-6 h-6 min-w-[25px]" />
+              {isExpanded && (
+                <span className="text-base font-semibold capitalize whitespace-nowrap">
+                  pengaturan
+                </span>
+              )}
+            </div>
           </NavLink>
 
           <NavLink
             to={userRole === "guru" ? "/guru/bantuan" : "/bantuan"}
             className={({ isActive }) => getButtonClass(isActive)}
           >
-            <FaRegCircleQuestion className="w-6 h-6 min-w-[25px]" />
-            {isExpanded && <span className="text-lg">bantuan</span>}
+            <div className="flex items-center gap-4 flex-1 relative">
+              <FaRegCircleQuestion className="w-6 h-6 min-w-[25px]" />
+              {isExpanded && (
+                <span className="text-base font-semibold capitalize whitespace-nowrap">
+                  bantuan
+                </span>
+              )}
+            </div>
           </NavLink>
         </div>
       </div>

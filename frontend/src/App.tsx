@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "@/components/upperMenu";
+import UpperMenu from "@/components/upperMenu";
 import {
   Routes,
   Route,
@@ -22,13 +22,15 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import ManajemenMurid from "./pages/admin/ManajemenMurid";
 import ManajemenGuru from "./pages/admin/ManajemenGuru";
 import { getRoleFromToken } from "@/lib/utils";
+import ManajemenPelajaran from "./pages/admin/ManajemenPelajaran";
 
 const DashboardLayout = () => {
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
   return (
-    <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden">
-      <Sidebar />
+    <div className="flex h-screen w-full bg-[#FDFDFD] overflow-hidden">
+      <Sidebar isExpanded={isExpanded} />
       <main className="flex-1 overflow-y-auto">
-        <Navbar />
+        <UpperMenu onCloseSidebar={() => setIsExpanded(!isExpanded)} />
         <Outlet />
       </main>
     </div>
@@ -139,6 +141,10 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/manajemen-murid" element={<ManajemenMurid />} />
             <Route path="/admin/manajemen-guru" element={<ManajemenGuru />} />
+            <Route
+              path="/admin/manajemen-pelajaran"
+              element={<ManajemenPelajaran />}
+            />
           </Route>
         </Route>
       </Routes>
