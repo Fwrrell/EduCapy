@@ -165,8 +165,8 @@ router.get("/kalender", async (req, res) => {
 
     const [jadwalAktif] = await db.query(getKalender, [
       id_guru,
+      end_date, // urutan dituker agar start <= end dan end >= start
       start_date,
-      end_date,
     ]);
 
     // kelompokkan berdasarkan hari

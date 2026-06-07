@@ -23,6 +23,7 @@ import ManajemenMurid from "./pages/admin/ManajemenMurid";
 import ManajemenGuru from "./pages/admin/ManajemenGuru";
 import { getRoleFromToken } from "@/lib/utils";
 import ManajemenPelajaran from "./pages/admin/ManajemenPelajaran";
+import ManajemenKalender from "./pages/guru/ManajemenKalender";
 
 const DashboardLayout = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
@@ -133,6 +134,10 @@ function App() {
             <Route
               path="/guru/ketersediaan-jadwal"
               element={<KetersediaanPage />}
+            />
+            <Route
+              path="/guru/manajemen-kalender"
+              element={<ManajemenKalender />}
             />
           </Route>
 
