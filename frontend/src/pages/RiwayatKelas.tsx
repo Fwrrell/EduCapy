@@ -103,11 +103,8 @@ export default function RiwayatKelas() {
                         <CalendarSync className="w-4 h-4" />
                         Total Sesi
                       </div>
-                      <span className="font-bold text-sm text-slate-800">
+                      <span className="capitalize font-bold text-sm text-slate-800">
                         {kelas.total_sesi} sesi terjadwal
-                        <span className="text-[#2D6A4F] ml-1">
-                          (10 Efektif)
-                        </span>
                       </span>
                     </div>
                   </div>

@@ -159,7 +159,7 @@ INSERT INTO keahlian(id_guru,id_mapel) VALUES
 -- 6 masukan jadwal kesediaan guru dengan menggunakan id guru dari tabel guru , id mapel dari tabel mapel
 
 INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
-(3,1,'2026-01-01','2026-01-31'),(6,3,'2026-01-01','2026-01-31'),(3,1,'2026-02-01','2026-03-31');
+(3,1,'2026-01-01','2026-06-30'),(6,3,'2026-01-01','2026-01-31');
 INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
 (5,2,'2026-01-01','2026-05-31'),(5,1,'2026-01-01','2026-03-31');
 

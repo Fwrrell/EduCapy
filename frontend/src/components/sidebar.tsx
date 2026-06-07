@@ -49,7 +49,7 @@ export default function Sidebar() {
       name: "riwayat kelas",
       path: "/riwayat-kelas",
       icon: FaListUl,
-      badge: 2,
+      // badge: 2,
     },
   ];
 

@@ -14,9 +14,48 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
   const [hariTerpilih, setHaridipilih] = useState("");
   const [jamTerpilih, setJamdipilih] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
+  // state apakah guru tersedia pada rentang waktu yang diinginkan murid
+  const [intersection, setIntersection] = useState<
+    "idle" | "full" | "partial" | "none"
+  >("idle");
+  // state tanggal efektif guru bisa mengajar berdasarkan rentang yang diberi murid
+  const [tanggalEfektif, setTanggalEfektif] = useState({
+    mulai: "",
+    selesai: "",
+  });
+  useEffect(() => {
+    if (
+      !tanggalMulai ||
+      !tanggalSelesai ||
+      !guru.tanggal_mulai_bersedia ||
+      !guru.tanggal_selesai_bersedia
+    ) {
+      setIntersection("idle");
+      return;
+    }
+    const S1 = new Date(guru.tanggal_mulai_bersedia).getTime();
+    const E1 = new Date(guru.tanggal_selesai_bersedia).getTime();
+    const S2 = new Date(tanggalMulai).getTime();
+    const E2 = new Date(tanggalSelesai).getTime();
+    // jika tidak beririsan
+    if (E2 < S1 || S2 > E1) {
+      setIntersection("none");
+    } else if (S2 >= S1 && E2 <= E1) {
+      setIntersection("full");
+    } else {
+      setIntersection("partial");
+      const actualStart = new Date(Math.max(S1, S2));
+      const actualEnd = new Date(Math.min(E1, E2));
+      setTanggalEfektif({
+        mulai: actualStart.toISOString().split("T")[0],
+        selesai: actualEnd.toISOString().split("T")[0],
+      });
+    }
+  }, [tanggalMulai, tanggalSelesai, guru]);
+  // state jadwal kesediaan guru
   const [jadwal, setJadwal] = useState<any[]>([]);
-
+  // state jadwal peserta mendaftar
+  const [jadwalTerbooking, setJadwalTerbooking] = useState<any[]>([]);
   useEffect(() => {
     const fetchJadwal = async () => {
       try {
@@ -24,7 +63,8 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
           `http://localhost:3000/api/murid/jadwal/${guru.id}`,
         );
         const data = await dataJadwalGuru.json();
-        setJadwal(data);
+        setJadwal(data.tersedia || []);
+        setJadwalTerbooking(data.terbooking || []);
       } catch (error) {
         console.error("gagal fetch jadwal:", error);
       }
@@ -37,12 +77,40 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
   const hariTersedia = [
     ...new Set(jadwal.map((item) => item.hari_mengajar.toUpperCase())),
   ];
-  const jamTersedia = jadwal
+  const jamTersedia: any[] = [];
+  jadwal
     .filter((item) => item.hari_mengajar.toUpperCase() === hariTerpilih)
-    .map((item) => {
-      const mulai = item.jam_mulai.substring(0, 5);
-      const selesai = item.jam_selesai.substring(0, 5);
-      return `${mulai}-${selesai}`;
+    .forEach((item) => {
+      const mulai = parseInt(item.jam_mulai.substring(0, 2), 10);
+      const selesai = parseInt(item.jam_selesai.substring(0, 2), 10);
+      for (let i = mulai; i < selesai; i++) {
+        const jamMulai = `${i.toString().padStart(2, "0")}:00`;
+        const jamAkhir = `${(i + 1).toString().padStart(2, "0")}:00`;
+        const isBooked = jadwalTerbooking.some((booked) => {
+          const isHariSama =
+            booked?.hari_mengajar?.toUpperCase() === hariTerpilih;
+          const isJamSama = booked?.jam_mulai_les?.substring(0, 5) === jamMulai;
+          if (isHariSama && isJamSama && tanggalMulai && tanggalSelesai) {
+            const formStart = new Date(tanggalMulai);
+            const formEnd = new Date(tanggalSelesai);
+            const dbStart = new Date(booked.tanggal_mulai);
+            const dbEnd = new Date(booked.tanggal_selesai);
+
+            const isTanggalOverlap = dbStart <= formEnd && dbEnd >= formStart;
+
+            return isTanggalOverlap;
+          }
+          return isHariSama && isJamSama;
+        });
+        if (!isBooked) {
+          jamTersedia.push({
+            id_jadwal: item.id_jadwal,
+            label: `${jamMulai} - ${jamAkhir}`,
+            jamMulaiSpesifik: jamMulai,
+            jamAkhirSpesifik: jamAkhir,
+          });
+        }
+      }
     });
 
   // Function suibmit pendaftaran les
@@ -64,13 +132,9 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
       return;
     }
 
-    // cari id_jadwal berdasarkan hari dan jam yang dipilih user
-    const selectedJadwal = jadwal.find((item) => {
-      const jam = `${item.jam_mulai.substring(0, 5)}-${item.jam_selesai.substring(0, 5)}`;
-      return (
-        item.hari_mengajar.toUpperCase() === hariTerpilih && jam === jamTerpilih
-      );
-    });
+    const selectedJadwal = jamTersedia.find(
+      (slot) => slot.label === jamTerpilih,
+    );
 
     if (!selectedJadwal) {
       alert("Jadwal tidak valid!");
@@ -94,6 +158,8 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
           nama_mapel: mapelTerpilih,
           tanggal_mulai: tanggalMulai,
           tanggal_selesai: tanggalSelesai,
+          jam_mulai_les: selectedJadwal.jamMulaiSpesifik,
+          jam_selesai_les: selectedJadwal.jamAkhirSpesifik,
         }),
       });
 
@@ -205,69 +271,107 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
                 </div>
               </div>
             </div>
-
-            {/* Step 3: Hari Belajar */}
-            <div className="flex flex-col gap-3">
-              <label className="text-slate-600 font-bold">
-                Step 3: Pilih Hari Rutin Belajar
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {hariTersedia.map((hari) => (
-                  <button
-                    key={hari}
-                    onClick={() => {
-                      setHaridipilih(hari);
-                      setJamdipilih(""); // Reset jam jika ganti hari
-                    }}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
-                      hari === hariTerpilih
-                        ? "bg-[#406749] border-[#406749] text-white"
-                        : "bg-white border-slate-200 text-slate-600 hover:border-[#406749]"
-                    }`}
-                  >
-                    {hari}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Step 4: Jam Les */}
-            <div className="flex flex-col gap-3">
-              <label className="text-slate-600 font-bold">
-                Step 4: Pilih Waktu Belajar
-                {hariTerpilih && (
-                  <span className="text-[#406749]"> ({hariTerpilih})</span>
-                )}
-              </label>
-              {!hariTerpilih ? (
-                <p className="text-sm text-slate-400 italic">
-                  Silakan pilih hari terlebih dahulu.
+            {intersection === "none" && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl animate-in fade-in">
+                <p className="text-red-600 text-sm font-bold text-center">
+                  Guru tidak tersedia pada tanggal {tanggalMulai} sampai{" "}
+                  {tanggalSelesai}.
                 </p>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {jamTersedia.map((jam) => (
-                    <button
-                      key={jam}
-                      onClick={() => setJamdipilih(jam)}
-                      className={`py-2 px-1 rounded-xl text-sm font-bold border transition-colors ${
-                        jam === jamTerpilih
-                          ? "bg-[#406749] border-[#406749] text-white"
-                          : "bg-white border-slate-200 text-slate-600 hover:border-[#406749]"
-                      }`}
-                    >
-                      {jam}
-                    </button>
-                  ))}
+              </div>
+            )}
+            {intersection === "partial" && (
+              <div className="flex flex-col gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl animate-in fade-in">
+                <p className="text-yellow-800 text-sm font-bold text-center">
+                  ⚠️ Guru hanya tersedia sebagian pada rentang waktu ini.
+                  <br />
+                  <span className="text-yellow-600 font-medium">
+                    Efektif: {tanggalEfektif.mulai} s/d {tanggalEfektif.selesai}
+                  </span>
+                </p>
+                <div className="flex gap-2 w-full mt-1">
+                  <button
+                    onClick={onClose}
+                    className="flex-1 py-2 text-sm font-bold bg-white text-yellow-700 border border-yellow-300 rounded-lg hover:bg-yellow-100 transition-colors"
+                  >
+                    Pilih Guru Lain
+                  </button>
+                  <button
+                    onClick={() =>
+                      alert("Fitur cari guru pengganti belum dibuat!")
+                    }
+                    className="flex-1 py-2 text-sm font-bold bg-[#D4A373] text-white rounded-lg hover:bg-[#b0855b] transition-colors"
+                  >
+                    Tambah Pengganti
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+            {/* Step 3: Hari Belajar */}
+            {intersection !== "none" && (
+              <>
+                <div className="flex flex-col gap-3">
+                  <label className="text-slate-600 font-bold">
+                    Step 3: Pilih Hari Rutin Belajar
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {hariTersedia.map((hari) => (
+                      <button
+                        key={hari}
+                        onClick={() => {
+                          setHaridipilih(hari);
+                          setJamdipilih(""); // Reset jam jika ganti hari
+                        }}
+                        className={`px-4 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+                          hari === hariTerpilih
+                            ? "bg-[#406749] border-[#406749] text-white"
+                            : "bg-white border-slate-200 text-slate-600 hover:border-[#406749]"
+                        }`}
+                      >
+                        {hari}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Step 4: Jam Les */}
+                <div className="flex flex-col gap-3">
+                  <label className="text-slate-600 font-bold">
+                    Step 4: Pilih Waktu Belajar
+                    {hariTerpilih && (
+                      <span className="text-[#406749]"> ({hariTerpilih})</span>
+                    )}
+                  </label>
+                  {!hariTerpilih ? (
+                    <p className="text-sm text-slate-400 italic">
+                      Silakan pilih hari terlebih dahulu.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {jamTersedia.map((jam, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setJamdipilih(jam.label)}
+                          className={`py-2 px-1 rounded-xl text-sm font-bold border transition-colors ${
+                            jam.label === jamTerpilih
+                              ? "bg-[#406749] border-[#406749] text-white"
+                              : "bg-white border-slate-200 text-slate-600 hover:border-[#406749]"
+                          }`}
+                        >
+                          {jam.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
           {/* FOOTER ACTION */}
           <div className="border-t border-dashed border-slate-300 pt-6 mt-2 flex flex-col gap-4 bg-white">
             <button
               onClick={handleSubmitBooking}
-              disabled={isLoading}
+              disabled={isLoading || intersection === "none"}
               className="w-full bg-[#406749] hover:bg-[#32523b] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
             >
               {isLoading ? "Memproses..." : "Simpan ke Daftar Booking"}

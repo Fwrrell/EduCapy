@@ -91,6 +91,7 @@ export default function Jadwal() {
   const getStatusStyle = (status: string) => {
     if (status === "Mendatang") {
       return {
+        bg: "bg-[##22C55E]",
         text: "text-[#D1D5DB]",
         dot: "#22C55E",
         label: "Akan datang",
