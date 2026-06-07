@@ -23,7 +23,17 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
     mulai: "",
     selesai: "",
   });
+  // state jadwal kesediaan guru
+  const [jadwal, setJadwal] = useState<any[]>([]);
+  // state jadwal peserta mendaftar
+  const [jadwalTerbooking, setJadwalTerbooking] = useState<any[]>([]);
   useEffect(() => {
+    if (!guru) return;
+
+    if (!guru.tanggal_mulai_bersedia || !guru.tanggal_selesai_bersedia) {
+      setIntersection("idle");
+      return;
+    }
     if (
       !tanggalMulai ||
       !tanggalSelesai ||
@@ -33,10 +43,43 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
       setIntersection("idle");
       return;
     }
-    const S1 = new Date(guru.tanggal_mulai_bersedia).getTime();
-    const E1 = new Date(guru.tanggal_selesai_bersedia).getTime();
-    const S2 = new Date(tanggalMulai).getTime();
-    const E2 = new Date(tanggalSelesai).getTime();
+
+    const toDateOnly = (dateString: string) => {
+      const d = new Date(dateString);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    };
+    // tanggal yang dipilih murid
+    const S2 = toDateOnly(tanggalMulai);
+    const E2 = toDateOnly(tanggalSelesai);
+    const sortedJadwal = [...jadwal].sort(
+      (a, b) =>
+        new Date(a.tanggal_awal_bersedia).getTime() -
+        new Date(b.tanggal_awal_bersedia).getTime(),
+    );
+    // periksa apakah jadwal yang dipilih murid berisisan dengan 2 jadwal kesediaan berbeda
+    let celah = false;
+    if (jadwal && jadwal.length > 1) {
+      for (let i = 0; i < sortedJadwal.length - 1; i++) {
+        const endRow1 = toDateOnly(sortedJadwal[i].tanggal_akhir_bersedia);
+        const startRow2 = toDateOnly(sortedJadwal[i + 1].tanggal_awal_bersedia);
+
+        // Jika ada jeda lebih dari 1 hari, dianggap celah
+        if (startRow2 > endRow1 + 24 * 60 * 60 * 1000) {
+          // Cek apakah rentang murid memotong celah tersebut
+          if (endRow1 < E2 && startRow2 > S2) {
+            celah = true;
+            break;
+          }
+        }
+      }
+    }
+    if (celah) {
+      setIntersection("none");
+      return;
+    }
+    // tanggal yang dipilih guru
+    const S1 = toDateOnly(guru.tanggal_mulai_bersedia);
+    const E1 = toDateOnly(guru.tanggal_selesai_bersedia);
     // jika tidak beririsan
     if (E2 < S1 || S2 > E1) {
       setIntersection("none");
@@ -44,18 +87,20 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
       setIntersection("full");
     } else {
       setIntersection("partial");
-      const actualStart = new Date(Math.max(S1, S2));
-      const actualEnd = new Date(Math.min(E1, E2));
+      const formatLocal = (time: number) => {
+        const d = new Date(time);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      };
       setTanggalEfektif({
-        mulai: actualStart.toISOString().split("T")[0],
-        selesai: actualEnd.toISOString().split("T")[0],
+        mulai: formatLocal(Math.max(S1, S2)),
+        selesai: formatLocal(Math.min(E1, E2)),
       });
     }
-  }, [tanggalMulai, tanggalSelesai, guru]);
-  // state jadwal kesediaan guru
-  const [jadwal, setJadwal] = useState<any[]>([]);
-  // state jadwal peserta mendaftar
-  const [jadwalTerbooking, setJadwalTerbooking] = useState<any[]>([]);
+  }, [tanggalMulai, tanggalSelesai, guru, jadwal]);
+
   useEffect(() => {
     const fetchJadwal = async () => {
       try {
@@ -77,7 +122,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
   const hariTersedia = [
     ...new Set(jadwal.map((item) => item.hari_mengajar.toUpperCase())),
   ];
-  const jamTersedia: any[] = [];
+  const jamMap = new Map();
   jadwal
     .filter((item) => item.hari_mengajar.toUpperCase() === hariTerpilih)
     .forEach((item) => {
@@ -86,6 +131,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
       for (let i = mulai; i < selesai; i++) {
         const jamMulai = `${i.toString().padStart(2, "0")}:00`;
         const jamAkhir = `${(i + 1).toString().padStart(2, "0")}:00`;
+        const labelJam = `${jamMulai} - ${jamAkhir}`;
         const isBooked = jadwalTerbooking.some((booked) => {
           const isHariSama =
             booked?.hari_mengajar?.toUpperCase() === hariTerpilih;
@@ -102,8 +148,8 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
           }
           return isHariSama && isJamSama;
         });
-        if (!isBooked) {
-          jamTersedia.push({
+        if (!isBooked && !jamMap.has(labelJam)) {
+          jamMap.set(labelJam, {
             id_jadwal: item.id_jadwal,
             label: `${jamMulai} - ${jamAkhir}`,
             jamMulaiSpesifik: jamMulai,
@@ -112,7 +158,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
         }
       }
     });
-
+  const jamTersedia = Array.from(jamMap.values());
   // Function suibmit pendaftaran les
   const handleSubmitBooking = async () => {
     if (

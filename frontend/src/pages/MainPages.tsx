@@ -1,5 +1,39 @@
 import { GraduationCap, Timer, CalendarClock, BookOpen } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getNameFromToken } from "@/lib/utils";
 export default function MainPages() {
+  const [firstName, setFirstName] = useState("Pengguna");
+
+  useEffect(() => {
+    const fullName = getNameFromToken();
+
+    if (fullName) {
+      const namaDepan = fullName.split(" ")[0];
+      setFirstName(namaDepan);
+    }
+  }, []);
+  const token = localStorage.getItem("token");
+  const [jadwal, setJadwal] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchJadwal = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/murid/jadwalku",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        const data = await response.json();
+        setJadwal(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  });
   return (
     <>
       <div className="flex flex-col gap-10 p-10 w-full ">
@@ -7,7 +41,7 @@ export default function MainPages() {
         <div className="flex justify-between items-center bg-white rounded-2xl shadow-md p-10">
           <div className="">
             <h1 className="text-[3.5rem] font-bold">
-              Selamat Datang, {`Budi`}!
+              Selamat Datang, {firstName}!
             </h1>
             <p className="text-[1.5rem] font-normal">
               Mau belajar apa hari ini?

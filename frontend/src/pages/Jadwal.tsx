@@ -1,38 +1,69 @@
 import { Timer, FileText, ArrowUpDown } from "lucide-react";
 import { FaRegCircleDot } from "react-icons/fa6";
 import { useState, useEffect } from "react";
-const jadwalData = [
-  {
-    id: 1,
-    jam: "14:00",
-    durasi: "90 min",
-    status: "besok",
-    judul: "Matematika - Kalkulus",
-    tingkat: "SD - tingkat 5",
-    dosen: "Dr. Drs. Ir. H. John Doe, S.E., S.H., M.T., M.Si., M.H., M.Pd.",
-  },
-  {
-    id: 2,
-    jam: "16:30",
-    durasi: "60 min",
-    status: "hari ini",
-    judul: "Bahasa Indonesia - Sastra",
-    tingkat: "SMP - tingkat 2",
-    dosen: "Ibu Budiwati, S.S., M.Hum.",
-  },
-  {
-    id: 3,
-    jam: "14:00",
-    durasi: "90 min",
-    status: "selesai",
-    judul: "Geologi - Struktur Tanah",
-    tingkat: "SMP - tingkat 2",
-    dosen: "Asep, S.Si",
-  },
-];
 export default function Jadwal() {
   const token = localStorage.getItem("token");
   const [jadwal, setJadwal] = useState<any[]>([]);
+  const getTanggalTerdekat = (
+    hari: string,
+    startDateStr: string,
+    endDateStr: string,
+    status: string,
+  ) => {
+    if (!startDateStr || !endDateStr) return "-";
+
+    // Jika kelas sudah Selesai/Batal, tampilkan saja rentang masa kontraknya
+    if (status === "Selesai" || status === "Dibatalkan") {
+      const start = new Date(startDateStr).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+      });
+      const end = new Date(endDateStr).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+      return `${start} - ${end}`;
+    }
+
+    const hariMap: Record<string, number> = {
+      MINGGU: 0,
+      SENIN: 1,
+      SELASA: 2,
+      RABU: 3,
+      KAMIS: 4,
+      JUMAT: 5,
+      SABTU: 6,
+    };
+    const targetHari = hariMap[hari.toUpperCase()];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
+
+    // Titik awal perhitungan: Hari ini ATAU tanggal mulai kontrak (pilih yang lebih baru)
+    let baseDate = today > start ? new Date(today) : new Date(start);
+
+    // menghitung jarak hari dari hari sekarang ke sesi berikutnya
+    let currentHari = baseDate.getDay();
+    let selisihHari = (targetHari + 7 - currentHari) % 7;
+
+    const nextDate = new Date(baseDate);
+    nextDate.setDate(baseDate.getDate() + selisihHari);
+
+    // Jika tanggal terdekatnya ternyata sudah melewati masa kontrak
+    if (nextDate > end) {
+      return "Sesi Berakhir";
+    }
+
+    return nextDate.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
   useEffect(() => {
     const fetchJadwal = async () => {
       try {
@@ -64,8 +95,8 @@ export default function Jadwal() {
 
     return `${totalMenitSelesai - totalMenitMulai} MIN`;
   };
-  const [activeTab, setActiveTab] = useState("semua");
-  const tabs = ["Semua", "Akan datang", "Selesai", "Dibatalkan"];
+  const [activeTab, setActiveTab] = useState("Semua");
+  const tabs = ["Semua", "Akan Datang", "Selesai", "Dibatalkan"];
   const filteredData = jadwal.filter((kelas) => {
     if (activeTab === "Semua") return true;
     if (activeTab === "Akan Datang") return kelas.status === "Mendatang";
@@ -88,15 +119,41 @@ export default function Jadwal() {
     }
     return 0;
   };
-  const getStatusStyle = (status: string) => {
+  const getStatusStyle = (kelas: any) => {
+    const status = kelas.status;
     if (status === "Mendatang") {
-      return {
-        bg: "bg-[##22C55E]",
-        text: "text-[#D1D5DB]",
-        dot: "#22C55E",
-        label: "Akan datang",
-        isCoret: false,
+      const hariMap: Record<number, string> = {
+        0: "MINGGU",
+        1: "SENIN",
+        2: "SELASA",
+        3: "RABU",
+        4: "KAMIS",
+        5: "JUMAT",
+        6: "SABTU",
       };
+      const namaHariIni = hariMap[new Date().getDay()];
+
+      const isHariIni = kelas.hari_mengajar.toUpperCase() === namaHariIni;
+
+      if (isHariIni) {
+        // Tampilan jika hari ini
+        return {
+          bg: "bg-[#22C55E]",
+          text: "text-white",
+          dot: "#FFFFFF",
+          label: "Hari ini",
+          isCoret: false,
+        };
+      } else {
+        // Tampilan jika mendatang
+        return {
+          bg: "bg-slate-100",
+          text: "text-slate-500",
+          dot: "#9CA3AF",
+          label: "Akan datang",
+          isCoret: false,
+        };
+      }
     }
     if (status === "Batal") {
       return {
@@ -124,32 +181,51 @@ export default function Jadwal() {
       isCoret: false,
     };
   };
+  // 1. Cari kelas hari ini
+  const hariMap: Record<number, string> = {
+    0: "MINGGU",
+    1: "SENIN",
+    2: "SELASA",
+    3: "RABU",
+    4: "KAMIS",
+    5: "JUMAT",
+    6: "SABTU",
+  };
+  const namaHariIni = hariMap[new Date().getDay()];
+
+  const kelasHariIni = jadwal.find(
+    (k) =>
+      k.hari_mengajar.toUpperCase() === namaHariIni && k.status === "Mendatang",
+  );
   return (
     <>
       <div className="flex flex-col p-12">
-        <h1 className="capitalize text-4xl font-bold">kelas hari ini</h1>
-        {/* current class card */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#606C38] to-[#283618] p-6 rounded-xl mt-2">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <Timer className="w-7 h-7" color="#FFFF" />
-              <p className="capitalize text-white font-semibold text-lg">
-                akan dimulai dalam 45 menit
-              </p>
+        {kelasHariIni ? (
+          <div className="flex items-center justify-between bg-gradient-to-r from-[#606C38] to-[#283618] p-6 rounded-xl mt-2">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <Timer className="w-7 h-7" color="#FFFF" />
+                <p className="capitalize text-white font-semibold text-lg">
+                  Dimulai pukul {kelasHariIni.jam_mulai_les.substring(0, 5)}
+                </p>
+              </div>
+              <h3 className="text-white font-bold text-4xl">
+                {kelasHariIni.nama_mapel}
+              </h3>
+              <h4 className="text-white text-lg">{kelasHariIni.nama_guru}</h4>
             </div>
-            <h3 className="text-white font-bold text-4xl">
-              Matematika - Aljabar
-            </h3>
-            <h4 className="text-white text-lg">
-              Dr. Drs. Ir. H. John Doe, S.E., S.H., M.T., M.Si., M.H., M.Pd.
-            </h4>
+
+            <button className="rounded-lg p-3 text-[#406749] font-semibold bg-white flex gap-3 items-center">
+              <FileText className="w-7 h-7" />
+              <span className="text-xl">Materi Pertemuan</span>
+            </button>
           </div>
-          {/* button material */}
-          <button className="rounded-lg p-3 text-[#406749] font-semibold bg-white flex gap-3 cursor-pointer items-center">
-            <FileText className="w-7 h-7" />
-            <span className="text-xl">Materi Pertemuan</span>
-          </button>
-        </div>
+        ) : (
+          // Tampilan tidak ada kelas
+          <div className="bg-slate-200 p-6 rounded-xl mt-2 text-slate-600 text-lg text-center">
+            Tidak ada kelas hari ini. Selamat beristirahat!
+          </div>
+        )}
         {/* filter */}
         <div className="flex items-center justify-between mt-10 mb-6">
           <div className="flex bg-slate-100 p-1.5 rounded-xl gap-1">
@@ -177,7 +253,7 @@ export default function Jadwal() {
         <div className="flex flex-1 flex-col items-center gap-3">
           {/* card 1 */}
           {filteredData.map((kelas, index) => {
-            const style = getStatusStyle(kelas.status);
+            const style = getStatusStyle(kelas);
             return (
               <div
                 key={index}
@@ -192,9 +268,22 @@ export default function Jadwal() {
                   <span className="text-[#9CA3AF]">
                     {hitungDurasiMenit(
                       kelas.jam_mulai_les,
-                      kelas.jam_akhir_les,
+                      kelas.jam_selesai_les,
                     )}
                   </span>
+                  <div className="flex flex-col mt-1">
+                    <span className="text-slate-600 font-semibold capitalize">
+                      {kelas.hari_mengajar}
+                    </span>
+                    <span className="text-sm font-bold text-[#406749]">
+                      {getTanggalTerdekat(
+                        kelas.hari_mengajar,
+                        kelas.tanggal_mulai,
+                        kelas.tanggal_selesai,
+                        kelas.status,
+                      )}
+                    </span>
+                  </div>
                   <span
                     className={`flex items-center gap-2 rounded-xl ${style.bg} px-2 py-1.5 w-fit mt-2`}
                   >
@@ -217,9 +306,11 @@ export default function Jadwal() {
                       {kelas.jenjang}-{kelas.tingkat}
                     </span>
                   </div>
-                  <p className="text-lg ">{kelas.nama_guru}</p>
+                  <p className="text-lg font-semibold capitalize">
+                    {kelas.nama_guru}
+                  </p>
                 </div>
-                {kelas.status === "besok" && (
+                {kelas.status === "Dibatalkan" && (
                   <div className="flex gap-3 ml-auto">
                     <button className="font-bold text-[#406749] border-2 border-[#406749] rounded-xl px-4 py-2 hover:bg-slate-50">
                       Ubah Jadwal

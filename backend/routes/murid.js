@@ -43,27 +43,14 @@ router.get("/cari-guru", async (req, res) => {
 
 router.get("/jadwal/:id_guru", async (req, res) => {
   const idGuru = req.params.id_guru;
-  // const query = `
-  //   SELECT
-  //     jadwal.id_jadwal,
-  //     jadwal.hari_mengajar,
-  //     jadwal.jam_mulai,
-  //     jadwal.jam_selesai
-  //   FROM jadwal_kesediaan
-  //   JOIN jadwal ON jadwal.id_kesediaan = jadwal_kesediaan.id_kesediaan
-  //   WHERE jadwal_kesediaan.id_guru= ?
-  //     AND jadwal.id_jadwal NOT IN (
-  //       SELECT pi.id_jadwal
-  //       FROM pendaftaran_item pi
-  //       WHERE pi.status!='Dibatalkan'
-  //       AND pi.tanggal_selesai>=CURDATE())
-  // `;
   try {
     // jadwal utama berisikan jadwal kesediaan guru
     const jadwalUtama = `SELECT j.id_jadwal, 
                           j.jam_mulai, 
                           j.jam_selesai, 
-                          j.hari_mengajar
+                          j.hari_mengajar,
+                          jk.tanggal_awal_bersedia,     
+                          jk.tanggal_akhir_bersedia
                           FROM jadwal j 
                           JOIN jadwal_kesediaan jk ON jk.id_kesediaan = j.id_kesediaan
                           WHERE jk.id_guru = ?`;
@@ -82,7 +69,6 @@ router.get("/jadwal/:id_guru", async (req, res) => {
                          AND pi.status!='Dibatalkan'
                          AND pi.tanggal_selesai>=CURDATE()`;
     const [terbooking] = await db.query(jadwalBook, [idGuru]);
-    // const [results] = await db.query(query, [idGuru]);
     res.status(200).json({ tersedia, terbooking });
   } catch (err) {
     console.error("gagal mengambil jadwal:", err);
@@ -145,39 +131,6 @@ router.post("/booking", verifyToken, async (req, res) => {
       [id_murid],
     );
     const id_daftar = daftarResult.insertId;
-    // handling jika murid mendaftar mapel yang sama di jam dan hari yang sama dengan pendaftaran kelas lain
-    // const [konflikResult] = await connection.query(
-    //   `SELECT mp.nama as nama_mapel2
-    //   FROM pendaftaran_item pi
-    //   JOIN jadwal j ON j.id_jadwal = pi.id_jadwal
-    //   JOIN pendaftaran p ON p.id_daftar=pi.id_daftar
-    //   JOIN mata_pelajaran mp ON pi.id_mapel = mp.id_mapel
-    //   WHERE p.id_murid= ?
-    //     AND j.hari_mengajar= ?
-    //     AND (pi.tanggal_mulai <= ? AND pi.tanggal_selesai >= ?)
-    //     AND (pi.jam_mulai_les < ? AND pi.jam_selesai_les > ?)
-    //     AND pi.status != 'dibatalkan'`,
-    //   [
-    //     id_murid,
-    //     hari_mengajar,
-    //     tanggal_selesai,
-    //     tanggal_mulai,
-    //     jam_selesai_les,
-    //     jam_mulai_les,
-    //   ],
-    // );
-    // // jika ditemukan jadwal yang konflik maka kembalikan error
-    // if (konflikResult.length > 0) {
-    //   const mapelBentrok = konflikResult[0].nama_mapel_bentrok;
-    //   throw new Error(
-    //     `Jadwal bentrok! Anda sudah memiliki jadwal kelas ${mapelBentrok} di hari dan jam tersebut.`,
-    //   );
-    // }
-    // const [daftarResult] = await connection.query(
-    //   "INSERT INTO pendaftaran (id_murid) VALUES (?)",
-    //   [id_murid],
-    // );
-    // const id_daftar = daftarResult.insertId;
 
     await connection.query(
       `INSERT INTO pendaftaran_item 
@@ -210,6 +163,8 @@ router.get("/jadwalku", verifyToken, async (req, res) => {
   const query = `SELECT u.nama as nama_guru, 
                     mp.nama as nama_mapel, 
                     j.hari_mengajar, 
+                    pi.tanggal_mulai,
+                    pi.tanggal_selesai,
                     pi.jam_mulai_les, 
                     pi.jam_selesai_les, 
                     pi.status,
@@ -224,7 +179,15 @@ router.get("/jadwalku", verifyToken, async (req, res) => {
                 JOIN guru g ON g.id_guru = jd.id_guru
                 JOIN user u ON u.id_user = g.id_guru
                 WHERE p.id_murid= ?`;
+  const updateQuery = `UPDATE pendaftaran_item pi
+                       JOIN jadwal j ON j.id_jadwal=pi.id_jadwal
+                       SET pi.status='Selesai'
+                       WHERE pi.status='Mendatang'
+                        AND pi.id_daftar IN (SELECT id_daftar FROM pendaftaran WHERE id_murid= ?)
+                        AND (
+                            CURDATE()>pi.tanggal_mulai OR DAYNAME(CURDATE())=hari_mengajar AND CURTIME()>pi.jam_selesai_les)`;
   try {
+    await db.query(updateQuery, [idMurid]);
     const [results] = await db.query(query, [idMurid]);
     res.status(200).json(results);
   } catch (err) {
