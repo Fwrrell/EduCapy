@@ -229,7 +229,7 @@ INSERT INTO pendaftaran(id_murid) VALUES
 
 -- 9 insert ke pendaftaran item, id_daftar lihat dari tabel pendaftaran,id jadwal lihat ke tabel jadwal, id mapel lihat ke tabel mapel
 
-SELECT * FROM pendaftaran_item;
+SELECT * FROM mata_pelajaran;
 
 INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan) 
 VALUES 
