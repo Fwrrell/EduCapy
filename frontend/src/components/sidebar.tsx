@@ -168,6 +168,7 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
               <NavLink
                 key={index}
                 to={item.path}
+                end={item.path === '/guru' || item.path === '/admin'}
                 className={({ isActive }) => getButtonClass(isActive)}
               >
                 <div
