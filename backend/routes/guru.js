@@ -148,8 +148,7 @@ router.get("/kalender", async (req, res) => {
                 pi.jam_selesai_les,
                 mp.nama AS nama_mapel,
                 u.nama AS nama_murid,
-                pi.status,
-                pi.catatan
+                pi.status
             FROM pendaftaran_item pi
             JOIN jadwal j ON pi.id_jadwal = j.id_jadwal
             JOIN jadwal_kesediaan jk ON j.id_kesediaan = jk.id_kesediaan
@@ -182,7 +181,6 @@ router.get("/kalender", async (req, res) => {
         jam_mulai: curr.jam_mulai_les.substring(0, 5), // HH:MM
         jam_selesai: curr.jam_selesai_les.substring(0, 5), // HH:MM
         status: curr.status,
-        catatan: curr.catatan,
       });
       return acc;
     }, {});
@@ -269,8 +267,7 @@ router.get("/riwayat-sesi", async (req, res) => {
                 pi.jam_selesai_les,
                 u.nama AS nama_murid,
                 mp.nama AS nama_mapel,
-                pi.status,
-                pi.catatan
+                pi.status
             FROM pendaftaran_item pi
             JOIN pendaftaran p ON pi.id_daftar = p.id_daftar
             JOIN user u ON p.id_murid = u.id_user

@@ -134,7 +134,7 @@ router.post("/booking", verifyToken, async (req, res) => {
 
     await connection.query(
       `INSERT INTO pendaftaran_item 
-      (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan) 
+      (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) 
       VALUES (?, ?, ?, ?, ?, ?, ?, 'Mendatang', 'Booking Baru')`,
       [
         id_daftar,

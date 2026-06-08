@@ -100,7 +100,6 @@ CREATE TABLE pendaftaran_item (
     jam_mulai_les TIME NOT NULL,
     jam_selesai_les TIME NOT NULL,
     status ENUM('Mendatang', 'Selesai', 'Batal'),
-    catatan TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     Foreign Key (id_daftar) REFERENCES pendaftaran(id_daftar) ON DELETE CASCADE,
@@ -231,7 +230,7 @@ INSERT INTO pendaftaran(id_murid) VALUES
 
 SELECT * FROM mata_pelajaran;
 
-INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status, catatan) 
+INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) 
 VALUES 
 
 
