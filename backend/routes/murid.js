@@ -96,9 +96,8 @@ router.get("/jadwal/:id_guru", async (req, res) => {
 });
 // post method untuk menyimmpan hasil pendaftaran kelas/les murid
 router.post("/booking", verifyToken, async (req, res) => {
-  // ambil id murid
   const id_murid = req.user.id_user;
-  // ambil data id jadwal, nama mapel, tanggal kontrak les dan jam mulai serta selesai les yang diisi murid
+  // Hapus semua deklarasi variabel yang terpisah, satukan di sini:
   const {
     id_jadwal,
     nama_mapel,
@@ -107,7 +106,7 @@ router.post("/booking", verifyToken, async (req, res) => {
     jam_mulai_les,
     jam_selesai_les,
   } = req.body;
-  // jika data belum lengkap maka munculkan peringatan
+
   if (
     !id_jadwal ||
     !nama_mapel ||
@@ -120,46 +119,30 @@ router.post("/booking", verifyToken, async (req, res) => {
       .status(400)
       .json({ message: "Lengkapi semua data pendaftaran!" });
   }
-  // get connection ke database
-  const connection = await db.getConnection();
 
+  const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
-    // ambil id mapel berdasarkan nama mapel yang diisi murid
+
     const [mapelResult] = await connection.query(
       "SELECT id_mapel FROM mata_pelajaran WHERE nama = ?",
       [nama_mapel],
     );
-
-    if (mapelResult.length === 0) {
+    if (mapelResult.length === 0)
       throw new Error("Mata pelajaran tidak ditemukan.");
-    }
-    // simpan id mapel
     const id_mapel = mapelResult[0].id_mapel;
-    // ambil hari mengajar  guru berdasarkan id jadwal
-    const [jadwalResult] = await connection.query(
-      "SELECT hari_mengajar FROM jadwal WHERE id_jadwal = ?",
-      [id_jadwal],
-    );
-    // jika hasil query tidak ditemukan record maka tampilkan error
-    if (jadwalResult.length === 0) {
-      throw new Error("Jadwal tidak ditemukan.");
-    }
-    // simpan hari mengajar ke result
-    const hari_mengajar = jadwalResult[0].hari_mengajar;
-    // simpan id murid ke pendaftaran
+
     const [daftarResult] = await connection.query(
       "INSERT INTO pendaftaran (id_murid) VALUES (?)",
       [id_murid],
     );
-    const id_daftar = daftarResult.insertId;
-    // query untuk menyimpan data pendaftaran ke pendaftaran item berisi detail kelas
+
+    // PERBAIKAN: Pastikan kolom di database sesuai (hapus 'Booking Baru' jika tidak ada di DB)
     await connection.query(
-      `INSERT INTO pendaftaran_item 
-      (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'Mendatang', 'Booking Baru')`,
+      `INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'Mendatang')`,
       [
-        id_daftar,
+        daftarResult.insertId,
         id_jadwal,
         id_mapel,
         tanggal_mulai,
@@ -173,8 +156,8 @@ router.post("/booking", verifyToken, async (req, res) => {
     res.status(201).json({ message: "Berhasil menyimpan ke daftar booking!" });
   } catch (error) {
     await connection.rollback();
-    console.error(error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+    console.error("Error Booking:", error);
+    res.status(500).json({ message: error.message });
   } finally {
     connection.release();
   }
@@ -268,8 +251,7 @@ router.get("/cari-pengganti", async (req, res) => {
       j.id_jadwal, 
       j.hari_mengajar,
       j.jam_mulai,
-      j.jam_selesai,
-      GROUP_CONCAT(DISTINCT mp.nama) AS matapelajaran
+      j.jam_selesai
     FROM user u
     JOIN guru g ON u.Id_user = g.Id_guru
     JOIN keahlian k ON g.Id_guru = k.Id_guru
@@ -282,7 +264,7 @@ router.get("/cari-pengganti", async (req, res) => {
       AND j.jam_selesai >= ?
       AND jk.tanggal_awal_bersedia <= ? 
       AND jk.tanggal_akhir_bersedia >= ?
-    GROUP BY u.Id_user, j.id_jadwal
+    GROUP BY u.Id_user
   `;
   try {
     // simpan data yang diisi murid ke array

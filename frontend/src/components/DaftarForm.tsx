@@ -31,6 +31,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
   const [sisaKontrak, setSisaKontrak] = useState({ mulai: "", selesai: "" });
   const [listGuruPengganti, setGuruPengganti] = useState<any[]>([]);
   const [penggantiTerpilih, setPenggantiTerpilih] = useState<any>(null);
+
   const fetchGuruPengganti = async () => {
     if (!mapelTerpilih || !hariTerpilih || !jamTerpilih) {
       alert(
@@ -43,6 +44,12 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
     const url = `http://localhost:3000/api/murid/cari-pengganti?mapel=${encodeURIComponent(mapelTerpilih)}&hari=${hariTerpilih}&jamMulai=${jamM}&jamSelesai=${jamS}&mulai=${sisaKontrak.mulai}&selesai=${sisaKontrak.selesai}`;
     const response = await fetch(url);
     const data = await response.json();
+    const uniqueTeachers = data.filter(
+      (guru: any, index: number, self: any[]) =>
+        index === self.findIndex((t) => t.id === guru.id),
+    );
+
+    setGuruPengganti(uniqueTeachers);
     setGuruPengganti(data);
   };
   // state jadwal kesediaan guru
