@@ -90,6 +90,7 @@ router.post("/guru", async (req, res) => {
 
 router.get("/murid-terdaftar", async (req, res) => {
   try {
+    // query untuk mendapatkan data semua akun murid yang terdaftar
     const query = `
         SELECT 
           u.id_user AS id,
@@ -113,9 +114,10 @@ router.get("/murid-terdaftar", async (req, res) => {
     res.status(500).json({ error: "Gagal mengambil data murid dari server" });
   }
 });
-
+// get method untuk mendapat guru terdaftar
 router.get("/guru-terdaftar", async (req, res) => {
   try {
+    // query mendapatkan data guru berupa id, nama , email, pendidikan, mata pelajaran yang diajar
     const query = `
       SELECT 
         u.id_user AS id,
@@ -139,9 +141,10 @@ router.get("/guru-terdaftar", async (req, res) => {
     res.status(500).json({ error: "Gagal mengambil data guru dari server" });
   }
 });
-
+// get method untuk mata pelajaran yang diajar
 router.get("/mata-pelajaran", async (req, res) => {
   try {
+    // query untuk mendapatkan mapel yang diajar oleh seluruh guru
     const query = `
       SELECT 
         MIN(mp.id_mapel) AS id, 
@@ -169,7 +172,7 @@ router.get("/mata-pelajaran", async (req, res) => {
       .json({ error: "Gagal mengambil data mata pelajaran dari server" });
   }
 });
-
+// post method untuk menyimpan mata pelajaran baru yang ditambahkan admin
 router.post("/mata-pelajaran", async (req, res) => {
   const { nama, jenjang, tingkat } = req.body;
 
@@ -241,22 +244,25 @@ router.post("/mata-pelajaran", async (req, res) => {
     connection.release();
   }
 });
-
+// get method untuk mendapatkan statistik dashboard admin
 router.get("/dashboard", async (req, res) => {
   try {
+    // query untuk mendapatkan total sesi mendatang
     const sqlSesiMendatang = `
-      SELECT 
-        COUNT(id_penditem) AS sesi_mendatang 
-      FROM pendaftaran_item 
-      WHERE status = 'Mendatang' AND tanggal_mulai >= CURDATE();
+    SELECT 
+    COUNT(id_penditem) AS sesi_mendatang 
+    FROM pendaftaran_item 
+    WHERE status = 'Mendatang' AND tanggal_mulai >= CURDATE();
     `;
 
+    // query untuk mendapatkan total mata pelajaran
     const sqlPelajaran = `
-      SELECT 
-        COUNT(id_mapel) AS total_pelajaran 
-      FROM mata_pelajaran;
+    SELECT 
+    COUNT(id_mapel) AS total_pelajaran 
+    FROM mata_pelajaran;
     `;
 
+    // query untuk mendapatkan mata pelajaran yang banyak diikuti
     const sqlTopMapel = `
       SELECT 
           mp.nama AS mapel_terfavorit, 
@@ -267,7 +273,7 @@ router.get("/dashboard", async (req, res) => {
       ORDER BY total_diambil DESC
       LIMIT 1;
     `;
-
+    // query untuk menghitung total jam mengajar guru di rentang tertentu
     const sqlSumJamGuru = `
       SELECT 
           COALESCE(SUM(TIMESTAMPDIFF(MINUTE, j.jam_mulai, j.jam_selesai)) / 60, 0) AS kapasitas_jam_per_minggu
@@ -275,7 +281,7 @@ router.get("/dashboard", async (req, res) => {
       JOIN jadwal_kesediaan jk ON j.id_kesediaan = jk.id_kesediaan
       WHERE CURDATE() BETWEEN jk.tanggal_awal_bersedia AND jk.tanggal_akhir_bersedia;
     `;
-
+    // query untuk mendapatkan seluruh pendaftaran terbaru
     const sqlRecentPendaftaran = `
       SELECT 
         pi.id_penditem, 
@@ -293,7 +299,7 @@ router.get("/dashboard", async (req, res) => {
       ORDER BY pi.id_penditem DESC 
       LIMIT 5
     `;
-
+    // query untuk mendapatkan seluruh akun guru
     const sqlGuruDaftar = `
       SELECT 
         id_user, 
@@ -305,7 +311,7 @@ router.get("/dashboard", async (req, res) => {
       ORDER BY id_user DESC 
       LIMIT 5
     `;
-
+    // query untuk mendapatkan akun murid
     const sqlMuridDaftar = `
       SELECT 
         id_user, 

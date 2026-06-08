@@ -1,9 +1,13 @@
+// deklarasi requirements
 const express = require("express");
+// inisialisasi express router
 const router = express.Router();
+//deklarasi path database
 const db = require("../config/db");
-
+// token middlewares untuk autentikasi akun
 const { verifyToken } = require("../middlewares/authMiddleware");
 
+// get method untuk mendapatkan id tingkat pendidikan
 router.get("/tingkat-pendidikan", async (req, res) => {
   try {
     const query = "SELECT * FROM tingkat_pendidikan";
@@ -14,10 +18,11 @@ router.get("/tingkat-pendidikan", async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
 });
-
+// get method untuk mendapatkan jam dan mata pelajaran tiap jadwal kesediaan guru (kelas)
 router.get("/cari-guru", async (req, res) => {
+  // variabel untuk tanggal awal bersedia dan akhir bersedia mengajar guru
   const { start, end } = req.query;
-
+  // query mendapatkan id user guru, nama guru, list mata pelajaran yang diajar, rentang tanggal kesediaan guru
   let query = `
     SELECT
       u.Id_user AS id,
@@ -32,16 +37,18 @@ router.get("/cari-guru", async (req, res) => {
     LEFT JOIN jadwal_kesediaan jk ON jk.id_guru = g.Id_guru
     WHERE u.role = 'guru'
   `;
-
+  // array untuk menyimpan parameter
   const params = [];
-
+  // jika tanggal awal dan akhir kontrak guru ada
   if (start && end) {
+    // tambahkan query where untuk mengambil jadwal kesediaan sesuai rentang kontrak guru
     query += ` AND jk.tanggal_awal_bersedia <= ? AND jk.tanggal_akhir_bersedia >= ?`;
+    // push ke array params
     params.push(end, start);
   }
-
+  // group berdasarkan id user dan nama
   query += ` GROUP BY u.Id_user, u.nama`;
-
+  // try catch untuk eksekusi query
   try {
     const [results] = await db.query(query, params);
     res.status(200).json(results);
@@ -50,7 +57,7 @@ router.get("/cari-guru", async (req, res) => {
     return res.status(500).json({ error: "Gagal mengambil data dari server" });
   }
 });
-
+// get method untuk jadwal booking berdasarkan id guru
 router.get("/jadwal/:id_guru", async (req, res) => {
   const idGuru = req.params.id_guru;
   try {
@@ -64,6 +71,7 @@ router.get("/jadwal/:id_guru", async (req, res) => {
                           FROM jadwal j 
                           JOIN jadwal_kesediaan jk ON jk.id_kesediaan = j.id_kesediaan
                           WHERE jk.id_guru = ?`;
+    // array untuk menyimpan data hasil eksekusi query jadwal kesediaan
     const [tersedia] = await db.query(jadwalUtama, [idGuru]);
     // mengambil jadwal yang telah dibooking  oleh murid
     const jadwalBook = `SELECT pi.id_jadwal,
@@ -78,6 +86,7 @@ router.get("/jadwal/:id_guru", async (req, res) => {
                         WHERE jk.id_guru= ?
                          AND pi.status!='Dibatalkan'
                          AND pi.tanggal_selesai>=CURDATE()`;
+    // array untuk menyimpan hasil query jadwal book guru
     const [terbooking] = await db.query(jadwalBook, [idGuru]);
     res.status(200).json({ tersedia, terbooking });
   } catch (err) {
@@ -85,10 +94,11 @@ router.get("/jadwal/:id_guru", async (req, res) => {
     return res.status(500).json({ error: "gagal mengambil data jadwal" });
   }
 });
-
+// post method untuk menyimmpan hasil pendaftaran kelas/les murid
 router.post("/booking", verifyToken, async (req, res) => {
+  // ambil id murid
   const id_murid = req.user.id_user;
-
+  // ambil data id jadwal, nama mapel, tanggal kontrak les dan jam mulai serta selesai les yang diisi murid
   const {
     id_jadwal,
     nama_mapel,
@@ -97,7 +107,7 @@ router.post("/booking", verifyToken, async (req, res) => {
     jam_mulai_les,
     jam_selesai_les,
   } = req.body;
-
+  // jika data belum lengkap maka munculkan peringatan
   if (
     !id_jadwal ||
     !nama_mapel ||
@@ -110,12 +120,12 @@ router.post("/booking", verifyToken, async (req, res) => {
       .status(400)
       .json({ message: "Lengkapi semua data pendaftaran!" });
   }
-
+  // get connection ke database
   const connection = await db.getConnection();
 
   try {
     await connection.beginTransaction();
-
+    // ambil id mapel berdasarkan nama mapel yang diisi murid
     const [mapelResult] = await connection.query(
       "SELECT id_mapel FROM mata_pelajaran WHERE nama = ?",
       [nama_mapel],
@@ -124,24 +134,26 @@ router.post("/booking", verifyToken, async (req, res) => {
     if (mapelResult.length === 0) {
       throw new Error("Mata pelajaran tidak ditemukan.");
     }
+    // simpan id mapel
     const id_mapel = mapelResult[0].id_mapel;
-    // ambil hari kesediaan mengajar guru
+    // ambil hari mengajar  guru berdasarkan id jadwal
     const [jadwalResult] = await connection.query(
       "SELECT hari_mengajar FROM jadwal WHERE id_jadwal = ?",
       [id_jadwal],
     );
-
+    // jika hasil query tidak ditemukan record maka tampilkan error
     if (jadwalResult.length === 0) {
       throw new Error("Jadwal tidak ditemukan.");
     }
+    // simpan hari mengajar ke result
     const hari_mengajar = jadwalResult[0].hari_mengajar;
-
+    // simpan id murid ke pendaftaran
     const [daftarResult] = await connection.query(
       "INSERT INTO pendaftaran (id_murid) VALUES (?)",
       [id_murid],
     );
     const id_daftar = daftarResult.insertId;
-
+    // query untuk menyimpan data pendaftaran ke pendaftaran item berisi detail kelas
     await connection.query(
       `INSERT INTO pendaftaran_item 
       (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) 
@@ -167,9 +179,10 @@ router.post("/booking", verifyToken, async (req, res) => {
     connection.release();
   }
 });
-
+// get method untuk mengambil jadwal murid
 router.get("/jadwalku", verifyToken, async (req, res) => {
   const idMurid = req.user.id_user;
+  // query untuk mengambil nama guru, nama mapel, hari mengajar, tanggal kontrak les, jam mulai dan selesai les, status, jenjang dari pendaftaran item
   const query = `SELECT u.nama as nama_guru, 
                     mp.nama as nama_mapel, 
                     j.hari_mengajar, 
@@ -189,6 +202,7 @@ router.get("/jadwalku", verifyToken, async (req, res) => {
                 JOIN guru g ON g.id_guru = jd.id_guru
                 JOIN user u ON u.id_user = g.id_guru
                 WHERE p.id_murid= ?`;
+  // query untuk update status kelas jadi selesai jika tanggal mulai sudah lebih besar dari tanggal sekarang dan jam mengajar lebih kecil dari jam sekarang
   const updateQuery = `UPDATE pendaftaran_item pi
                        JOIN jadwal j ON j.id_jadwal=pi.id_jadwal
                        SET pi.status='Selesai'
@@ -205,9 +219,10 @@ router.get("/jadwalku", verifyToken, async (req, res) => {
     return res.status(500).json({ error: "gagal mengambil data jadwal murid" });
   }
 });
-
+// get method untuk riwayat kelas yang pernah diikuti
 router.get("/riwayat-kelas", verifyToken, async (req, res) => {
   const idMurid = req.user.id_user;
+  // ambil data pendaftaran item serta agegrat jumlah pertemuan
   const query = `SELECT
                     u.nama AS nama_guru,
                     mp.nama AS mata_pelajaran,
@@ -241,7 +256,9 @@ router.get("/riwayat-kelas", verifyToken, async (req, res) => {
       .json({ error: "Gagal mengambil data riwayat kelas" });
   }
 });
+// get method untuk mencari guru pengganti ketika tanggal yang dipilih murid melebih kesediaan guru utama
 router.get("/cari-pengganti", async (req, res) => {
+  // ambil data mapel, hari, jam mulai, jamselesai, serta tanggal kontrak les
   const { mapel, hari, jamMulai, jamSelesai, mulai, selesai } = req.query;
 
   const query = `
@@ -268,6 +285,7 @@ router.get("/cari-pengganti", async (req, res) => {
     GROUP BY u.Id_user, j.id_jadwal
   `;
   try {
+    // simpan data yang diisi murid ke array
     const [results] = await db.query(query, [
       mapel,
       hari,
