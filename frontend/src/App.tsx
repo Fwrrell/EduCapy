@@ -24,6 +24,7 @@ import ManajemenGuru from "./pages/admin/ManajemenGuru";
 import { getRoleFromToken } from "@/lib/utils";
 import ManajemenPelajaran from "./pages/admin/ManajemenPelajaran";
 import ManajemenKalender from "./pages/guru/ManajemenKalender";
+import DaftarBooking from "./pages/guru/DaftarBooking";
 
 const DashboardLayout = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
@@ -139,6 +140,7 @@ function App() {
               path="/guru/manajemen-kalender"
               element={<ManajemenKalender />}
             />
+            <Route path="/guru/daftar-booking" element={<DaftarBooking />} />
           </Route>
 
           {/* admin akses route */}

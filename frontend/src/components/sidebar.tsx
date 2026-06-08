@@ -22,7 +22,6 @@ type MenuItem = {
   name: string;
   path: string;
   icon: ElementType;
-  badge?: number;
 };
 
 interface SidebarProps {
@@ -62,7 +61,6 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
       name: "daftar booking",
       path: "/guru/daftar-booking",
       icon: FaListUl,
-      badge: 2,
     },
   ];
 
@@ -168,7 +166,7 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
               <NavLink
                 key={index}
                 to={item.path}
-                end={item.path === '/guru' || item.path === '/admin'}
+                end={item.path === "/guru" || item.path === "/admin"}
                 className={({ isActive }) => getButtonClass(isActive)}
               >
                 <div
@@ -179,13 +177,6 @@ export default function Sidebar({ isExpanded }: SidebarProps) {
                     <span className="text-base font-semibold capitalize whitespace-nowrap">
                       {item.name}
                     </span>
-                  )}
-
-                  {/* badge notif */}
-                  {item.badge && isExpanded && (
-                    <div className="absolute right-0 bg-[#4B5563] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                      {item.badge}
-                    </div>
                   )}
                 </div>
               </NavLink>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   GraduationCap,
   Timer,
@@ -160,9 +161,12 @@ export default function MainPages() {
               <h3 className="font-bold text-xl text-slate-800">
                 Jadwal Mengajar Minggu Ini
               </h3>
-              <span className="text-[#406749] font-semibold text-sm cursor-pointer hover:underline">
+              <Link
+                to="/guru/daftar-booking"
+                className="text-[#406749] font-semibold text-sm cursor-pointer hover:underline"
+              >
                 Lihat Semua
-              </span>
+              </Link>
             </div>
 
             {/* List Cards Jadwal */}
@@ -312,9 +316,12 @@ export default function MainPages() {
 
             {/* Footer link semua permintaan kelas */}
             <div className="mt-auto pt-8 flex justify-center">
-              <span className="text-[#406749] font-semibold text-sm cursor-pointer hover:underline">
+              <Link
+                to="/guru/daftar-booking"
+                className="text-[#406749] font-semibold text-sm cursor-pointer hover:underline"
+              >
                 Lihat Semua Permintaan
-              </span>
+              </Link>
             </div>
           </div>
         </div>

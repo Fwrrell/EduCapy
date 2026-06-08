@@ -247,7 +247,7 @@ router.get("/riwayat-sesi", async (req, res) => {
 
   try {
     // query untuk menghitung banyak murid yang udah diajar
-    const countMurid = `
+    let countMurid = `
             SELECT COUNT(*) AS total_items
             FROM pendaftaran_item pi
             JOIN pendaftaran p ON pi.id_daftar = p.id_daftar
@@ -424,6 +424,48 @@ router.get("/dashboard", async (req, res) => {
     res.status(200).json({
       status: "success",
       data: dashboardData,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+});
+
+router.patch("/sesi/:id/status", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const id_guru = req.user.id_user;
+
+  if (!["Mendatang", "Selesai", "Batal"].includes(status)) {
+    return res.status(400).json({
+      status: "error",
+      message: "Status tidak valid!",
+    });
+  }
+
+  try {
+    const sqlBook = `
+      SELECT pi.id_penditem 
+      FROM pendaftaran_item pi
+      JOIN jadwal j ON pi.id_jadwal = j.id_jadwal
+      JOIN jadwal_kesediaan jk ON j.id_kesediaan = jk.id_kesediaan
+      WHERE pi.id_penditem = ? AND jk.id_guru = ?
+    `;
+    const [bookList] = await db.query(sqlBook, [id, id_guru]);
+
+    if (bookList.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Data sesi tidak ditemukan atau Anda tidak memiliki akses.",
+      });
+    }
+
+    const updateQuery = `UPDATE pendaftaran_item SET status = ? WHERE id_penditem = ?`;
+    await db.query(updateQuery, [status, id]);
+
+    res.status(200).json({
+      status: "success",
+      message: `Status sesi berhasil diubah menjadi ${status}`,
     });
   } catch (err) {
     console.error(err);
