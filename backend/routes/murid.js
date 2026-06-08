@@ -16,7 +16,9 @@ router.get("/tingkat-pendidikan", async (req, res) => {
 });
 
 router.get("/cari-guru", async (req, res) => {
-  const query = `
+  const { start, end } = req.query;
+
+  let query = `
     SELECT
       u.Id_user AS id,
       u.nama,
@@ -29,14 +31,22 @@ router.get("/cari-guru", async (req, res) => {
     LEFT JOIN mata_pelajaran mp ON k.Id_mapel = mp.Id_mapel
     LEFT JOIN jadwal_kesediaan jk ON jk.id_guru = g.Id_guru
     WHERE u.role = 'guru'
-    GROUP BY u.Id_user, u.nama
   `;
 
+  const params = [];
+
+  if (start && end) {
+    query += ` AND jk.tanggal_awal_bersedia <= ? AND jk.tanggal_akhir_bersedia >= ?`;
+    params.push(end, start);
+  }
+
+  query += ` GROUP BY u.Id_user, u.nama`;
+
   try {
-    const [results] = await db.query(query);
+    const [results] = await db.query(query, params);
     res.status(200).json(results);
   } catch (err) {
-    console.error("Gagal mengambil data guru:", err);
+    console.error("Gagal mengambil data guru:", err.message);
     return res.status(500).json({ error: "Gagal mengambil data dari server" });
   }
 });

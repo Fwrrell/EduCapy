@@ -200,7 +200,6 @@ export default function Jadwal() {
     5: "JUMAT",
     6: "SABTU",
   };
-  const namaHariIni = hariMap[new Date().getDay()];
 
   const kelasHariIni = jadwal.find((kelas) => {
     if (kelas.status !== "Mendatang") return false;
