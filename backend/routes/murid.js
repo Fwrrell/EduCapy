@@ -231,4 +231,47 @@ router.get("/riwayat-kelas", verifyToken, async (req, res) => {
       .json({ error: "Gagal mengambil data riwayat kelas" });
   }
 });
+router.get("/cari-pengganti", async (req, res) => {
+  const { mapel, hari, jamMulai, jamSelesai, mulai, selesai } = req.query;
+
+  const query = `
+    SELECT 
+      u.Id_user AS id, 
+      u.nama, 
+      j.id_jadwal, 
+      j.hari_mengajar,
+      j.jam_mulai,
+      j.jam_selesai,
+      GROUP_CONCAT(DISTINCT mp.nama) AS matapelajaran
+    FROM user u
+    JOIN guru g ON u.Id_user = g.Id_guru
+    JOIN keahlian k ON g.Id_guru = k.Id_guru
+    JOIN mata_pelajaran mp ON k.Id_mapel = mp.Id_mapel
+    JOIN jadwal_kesediaan jk ON jk.id_guru = g.Id_guru
+    JOIN jadwal j ON j.id_kesediaan = jk.id_kesediaan
+    WHERE mp.nama = ? 
+      AND j.hari_mengajar = ?
+      AND j.jam_mulai <= ? 
+      AND j.jam_selesai >= ?
+      AND jk.tanggal_awal_bersedia <= ? 
+      AND jk.tanggal_akhir_bersedia >= ?
+    GROUP BY u.Id_user, j.id_jadwal
+  `;
+  try {
+    const [results] = await db.query(query, [
+      mapel,
+      hari,
+      jamMulai,
+      jamSelesai,
+      mulai,
+      selesai,
+    ]);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("Gagal mengambil guru pengganti kelas:", error);
+    return res
+      .status(500)
+      .json({ error: "Gagal mengambil data guru pengganti" });
+  }
+});
 module.exports = router;

@@ -10,12 +10,14 @@ import FormDaftar from "@/components/DaftarForm";
 
 export default function Kelas() {
   const [daftarGuru, setDaftarGuru] = useState<any[]>([]);
+  const [guruTerpilih, setGuruTerpilih] = useState<any | null>(null);
+
   useEffect(() => {
     const fetchGuru = async () => {
       try {
-        const listGuru = await fetch(
-          "http://localhost:3000/api/murid/cari-guru",
-        );
+        let url = "http://localhost:3000/api/murid/cari-guru";
+
+        const listGuru = await fetch(url);
         const data = await listGuru.json();
         const formatData = data.map((guru: any) => ({
           ...guru,
@@ -30,8 +32,6 @@ export default function Kelas() {
     };
     fetchGuru();
   }, []);
-
-  const [guruTerpilih, setGuruTerpilih] = useState<any | null>(null);
 
   return (
     <>

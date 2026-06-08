@@ -122,20 +122,30 @@ export default function Jadwal() {
   const getStatusStyle = (kelas: any) => {
     const status = kelas.status;
     if (status === "Mendatang") {
-      const hariMap: Record<number, string> = {
-        0: "MINGGU",
-        1: "SENIN",
-        2: "SELASA",
-        3: "RABU",
-        4: "KAMIS",
-        5: "JUMAT",
-        6: "SABTU",
+      const hariMap: Record<string, number> = {
+        MINGGU: 0,
+        SENIN: 1,
+        SELASA: 2,
+        RABU: 3,
+        KAMIS: 4,
+        JUMAT: 5,
+        SABTU: 6,
       };
-      const namaHariIni = hariMap[new Date().getDay()];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-      const isHariIni = kelas.hari_mengajar.toUpperCase() === namaHariIni;
+      const start = new Date(kelas.tanggal_mulai);
+      start.setHours(0, 0, 0, 0);
 
-      if (isHariIni) {
+      const end = new Date(kelas.tanggal_selesai);
+      end.setHours(23, 59, 59, 999);
+
+      const namaHariIni = hariMap[kelas.hari_mengajar?.toUpperCase()];
+
+      const isHariIni = namaHariIni === today.getDay();
+      const isDalamKontrak = today >= start && today <= end;
+
+      if (isHariIni && isDalamKontrak) {
         // Tampilan jika hari ini
         return {
           bg: "bg-[#22C55E]",
@@ -145,7 +155,6 @@ export default function Jadwal() {
           isCoret: false,
         };
       } else {
-        // Tampilan jika mendatang
         return {
           bg: "bg-slate-100",
           text: "text-slate-500",
@@ -193,10 +202,34 @@ export default function Jadwal() {
   };
   const namaHariIni = hariMap[new Date().getDay()];
 
-  const kelasHariIni = jadwal.find(
-    (k) =>
-      k.hari_mengajar.toUpperCase() === namaHariIni && k.status === "Mendatang",
-  );
+  const kelasHariIni = jadwal.find((kelas) => {
+    if (kelas.status !== "Mendatang") return false;
+
+    const hariMap: Record<number, string> = {
+      0: "MINGGU",
+      1: "SENIN",
+      2: "SELASA",
+      3: "RABU",
+      4: "KAMIS",
+      5: "JUMAT",
+      6: "SABTU",
+    };
+    const namaHariIni = hariMap[new Date().getDay()];
+    const isHariSama = kelas.hari_mengajar?.toUpperCase() === namaHariIni;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const start = new Date(kelas.tanggal_mulai);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(kelas.tanggal_selesai);
+    end.setHours(23, 59, 59, 999);
+
+    const isDalamKontrak = today >= start && today <= end;
+
+    return isHariSama && isDalamKontrak;
+  });
   return (
     <>
       <div className="flex flex-col p-12">

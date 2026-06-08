@@ -4,6 +4,10 @@ import { Star, X, ArrowRight } from "lucide-react";
 interface FormDaftarProps {
   guru: any;
   onClose: () => void;
+  onCariPengganti?: (
+    dataUtama: any,
+    sisaRentang: { mulai: string; selesai: string },
+  ) => void;
 }
 
 export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
@@ -23,6 +27,24 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
     mulai: "",
     selesai: "",
   });
+  // State untuk sisa tanggal yang tidak beririsan dengan kesediaan guru utama
+  const [sisaKontrak, setSisaKontrak] = useState({ mulai: "", selesai: "" });
+  const [listGuruPengganti, setGuruPengganti] = useState<any[]>([]);
+  const [penggantiTerpilih, setPenggantiTerpilih] = useState<any>(null);
+  const fetchGuruPengganti = async () => {
+    if (!mapelTerpilih || !hariTerpilih || !jamTerpilih) {
+      alert(
+        "Silakan pilih mata pelajaran, hari dan jam kelas terlebih dahulu sebelum mencari pengganti!",
+      );
+      return;
+    }
+    const jamM = jamTerpilih.split(" - ")[0] + ":00";
+    const jamS = jamTerpilih.split(" - ")[1] + ":00";
+    const url = `http://localhost:3000/api/murid/cari-pengganti?mapel=${encodeURIComponent(mapelTerpilih)}&hari=${hariTerpilih}&jamMulai=${jamM}&jamSelesai=${jamS}&mulai=${sisaKontrak.mulai}&selesai=${sisaKontrak.selesai}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    setGuruPengganti(data);
+  };
   // state jadwal kesediaan guru
   const [jadwal, setJadwal] = useState<any[]>([]);
   // state jadwal peserta mendaftar
@@ -56,7 +78,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
         new Date(a.tanggal_awal_bersedia).getTime() -
         new Date(b.tanggal_awal_bersedia).getTime(),
     );
-    // periksa apakah jadwal yang dipilih murid berisisan dengan 2 jadwal kesediaan berbeda
+    // periksa jika jadwal yang dipilih murid berisisan dengan 2 jadwal kesediaan berbeda
     let celah = false;
     if (jadwal && jadwal.length > 1) {
       for (let i = 0; i < sortedJadwal.length - 1; i++) {
@@ -98,6 +120,20 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
         mulai: formatLocal(Math.max(S1, S2)),
         selesai: formatLocal(Math.min(E1, E2)),
       });
+      // jika murid memilih tanggal awal lebih dulu dari tanggal awal kesediaan guru
+      if (S2 < S1) {
+        setSisaKontrak({
+          mulai: formatLocal(S2),
+          selesai: formatLocal(S1 - 86400000), // H-1 sebelum guru utama mulai
+        });
+      }
+      // Jika murid memilih tanggal lebih dari kesediaan guru
+      else if (E2 > E1) {
+        setSisaKontrak({
+          mulai: formatLocal(E1 + 86400000), // H+1 setelah guru utama selesai
+          selesai: formatLocal(E2),
+        });
+      }
     }
   }, [tanggalMulai, tanggalSelesai, guru, jadwal]);
 
@@ -202,8 +238,12 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
         body: JSON.stringify({
           id_jadwal: selectedJadwal.id_jadwal,
           nama_mapel: mapelTerpilih,
-          tanggal_mulai: tanggalMulai,
-          tanggal_selesai: tanggalSelesai,
+          tanggal_mulai:
+            intersection === "partial" ? tanggalEfektif.mulai : tanggalMulai,
+          tanggal_selesai:
+            intersection === "partial"
+              ? tanggalEfektif.selesai
+              : tanggalSelesai,
           jam_mulai_les: selectedJadwal.jamMulaiSpesifik,
           jam_selesai_les: selectedJadwal.jamAkhirSpesifik,
         }),
@@ -214,7 +254,36 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
       if (!response.ok) {
         throw new Error(result.message || "Gagal melakukan booking");
       }
+      if (intersection === "partial" && penggantiTerpilih) {
+        // PERHATIAN: Di Backend (API cari-pengganti), kamu WAJIB mengembalikan `id_jadwal` milik guru pengganti
+        // yang sesuai dengan mapel, hari, dan jam yang dicari.
+        if (!penggantiTerpilih.id_jadwal) {
+          throw new Error(
+            "Sistem Backend belum mengirimkan id_jadwal untuk guru pengganti ini.",
+          );
+        }
 
+        const resPengganti = await fetch(
+          "http://localhost:3000/api/murid/booking",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              id_jadwal: penggantiTerpilih.id_jadwal,
+              nama_mapel: mapelTerpilih,
+              tanggal_mulai: sisaKontrak.mulai,
+              tanggal_selesai: sisaKontrak.selesai,
+              jam_mulai_les: selectedJadwal.jamMulaiSpesifik,
+              jam_selesai_les: selectedJadwal.jamAkhirSpesifik,
+            }),
+          },
+        );
+        if (!resPengganti.ok)
+          throw new Error("Gagal mendaftarkan Guru Pengganti");
+      }
       alert("Berhasil menyimpan ke daftar booking!");
       onClose(); // Tutup form popup
     } catch (error: any) {
@@ -342,13 +411,57 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
                     Pilih Guru Lain
                   </button>
                   <button
-                    onClick={() =>
-                      alert("Fitur cari guru pengganti belum dibuat!")
-                    }
+                    onClick={() => {
+                      fetchGuruPengganti();
+                    }}
                     className="flex-1 py-2 text-sm font-bold bg-[#D4A373] text-white rounded-lg hover:bg-[#b0855b] transition-colors"
                   >
                     Tambah Pengganti
                   </button>
+                </div>
+              </div>
+            )}
+            {listGuruPengganti.length > 0 && (
+              <div className="mt-4 border-t pt-4">
+                <p className="font-bold text-slate-700 mb-3">
+                  Pilih Guru Pengganti:
+                </p>
+                <div className="space-y-3">
+                  {listGuruPengganti.map((guru) => (
+                    <div
+                      key={guru.id}
+                      className={`flex items-center justify-between p-3 border rounded-xl transition-all ${
+                        penggantiTerpilih?.id === guru.id
+                          ? "border-[#406749] bg-[#C9EBCB]/30"
+                          : "border-slate-200 hover:border-[#406749]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500">
+                          {guru.nama.charAt(0)}
+                        </div>
+                        <span className="font-bold">{guru.nama}</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (penggantiTerpilih?.id === guru.id) {
+                            setPenggantiTerpilih(null);
+                          } else {
+                            setPenggantiTerpilih(guru);
+                          }
+                        }}
+                        className={`text-sm font-bold px-4 py-1.5 rounded-lg ${
+                          penggantiTerpilih?.id === guru.id
+                            ? "bg-[#406749] text-white"
+                            : "text-[#406749] bg-[#C9EBCB]/50"
+                        }`}
+                      >
+                        {penggantiTerpilih?.id === guru.id
+                          ? "Terpilih"
+                          : "Pilih"}
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
