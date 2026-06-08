@@ -82,30 +82,11 @@ cd frontend
 npm install
 ```
 
-### 3. cara menjalankan menu murid dan guru
+### 3. cara menjalankan website
 
 pastikan mySQL menyala
-Buka terminal dan masuk ke folder `backend`.
-ketik:
 
-```bash
-cd backend
-npm run dev
-```
-
-Buka terminal dan masuk ke folder `frontend`.
-ketik:
-
-```bash
-cd frontend
-npm run dev
-```
-
-klik url hasil menjalankan frontend
-
-### 4. cara menjalankan menu admin
-
-pastikan mySQL menyala
+Buka 2 terminal terpisah
 
 Buka terminal dan masuk ke folder `backend`.
 ketik:
@@ -123,4 +104,5 @@ cd frontend
 npm run dev
 ```
 
-klik url hasil menjalankan frontend kemudian ubah localhost:{port}/admin
+Ubah akhiran URL menjadi /admin untuk mengakses fitur **admin**.
+Ubah akhiran URL menjadi /guru untuk mengakses fitur **guru**.
