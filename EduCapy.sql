@@ -142,120 +142,102 @@ INSERT INTO user(nama,role,email,password) VALUES('Kapi','guru','Kapi@gmail.com'
 INSERT INTO user(nama,role,email,password) VALUES('Doni','guru','Doni@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.'),
                                                  ('Ivan Kumalala','murid','ivankumalala@gmail.com','$2a$10$/G5JfjjQYuyLsvfZAhr.Z.yX2YljM1I7pzJvw4fQRahOFBUclRxS.');
 
--- 2 masukan ke tabel murid menghubungkan id_murid dengan id_pendidikan
-insert into murid(id_murid,id_pendidikan) VALUES(2,10);-- id murid mengikuti id user lihat dlu tabel user 
+insert into murid(id_murid,id_pendidikan) VALUES(2,10); 
 insert into murid(id_murid,id_pendidikan) VALUES(4,12);
 INSERT into murid(id_murid,id_pendidikan) VALUES(7,9);
 
-
--- 3 masukan data spesifik guru lihat dari tabel user
 INSERT INTO guru(id_guru,pendidikan) VALUES
 (3,"S1 Teknik Informatika , Universitas Katolik Parahyangan"),(5,"S2 Metalurgi Institut Teknologi Bandung");
-
 INSERT INTO guru(id_guru,pendidikan) VALUES
 (6,"S1 Ekonomi ,Universitas Indonesia");
--- id guru bs berbeda jika sempat menghapus user yang lain
-
--- 4. masukan data mata_pelajaran dengan id pendidikan = di table murid
-
-INSERT INTO mata_pelajaran (id_pendidikan,nama) VALUES(12,'MATEMATIKA');
-INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (10, 'FISIKA');
-INSERT into mata_pelajaran(id_pendidikan,nama) VALUES (9,'BAHASA INGGRIS');
-INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (12, 'KIMIA');   -- Mapel SMA 3
-INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (11, 'BIOLOGI'); -- Mapel SMA 2
-INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES (12, 'EKONOMI'); -- Mapel SMA 3
 
 
+-- MATA PELAJARAN
+INSERT INTO mata_pelajaran (id_pendidikan, nama) VALUES
+(10, 'Matematika'),
+(10, 'Fisika'),
+(10, 'Kimia'),
+(10, 'Bahasa Inggris'),
+(12, 'Matematika'),
+(12, 'Fisika'),
+(12, 'Kimia'),
+(12, 'Biologi'),
+(12, 'Ekonomi'),
+(9, 'Matematika'),
+(9, 'IPA'),
+(9, 'Bahasa Inggris'),
+(9, 'Bahasa Indonesia');
 
+-- KEAHLIAN GURU 
+-- Agus (ID 3): Matematika, Fisika
+-- Kapi (ID 5): Fisika, Kimia, Biologi, IPA
+-- Doni (ID 6): Ekonomi, Bahasa Inggris, Bahasa Indonesia
+INSERT INTO keahlian(id_guru, id_mapel) VALUES 
+(3,1), (3,5), (3,2), (3,6), (3,10),
+(5,2), (5,6), (5,3), (5,7), (5,8), (5,11),
+(6,4), (6,9), (6,12), (6,13);
 
--- 5. KEAHLIAN GURU 
+-- JADWAL KESEDIAAN GURU
+INSERT INTO jadwal_kesediaan (id_kesediaan, id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
+(1, 3, 1, '2026-06-01', '2026-06-30'), -- Agus - Math SMA 1
+(2, 3, 5, '2026-06-01', '2026-06-30'), -- Agus - Math SMA 3
+(3, 5, 2, '2026-06-01', '2026-06-30'), -- Kapi - Fisika SMA 1
+(4, 5, 6, '2026-06-01', '2026-06-30'), -- Kapi - Fisika SMA 3
+(5, 5, 11, '2026-06-01', '2026-06-30'), -- Kapi - IPA SMP 3
+(6, 6, 9, '2026-06-01', '2026-06-30'), -- Doni - Ekonomi SMA 3
+(7, 6, 12, '2026-06-01', '2026-06-30'); -- Doni - B.Inggris SMP 3
 
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (3,1); -- Agus - Matematika
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (5,2); -- Kapi - Fisika
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (5,1); -- Kapi - Matematika
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (6,3); -- Doni - Bahasa Inggris
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (3,4); -- Agus - Kimia
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (3,6); -- Agus - Ekonomi
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (5,4); -- Kapi - Kimia
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (5,5); -- Kapi - Biologi
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (6,5); -- Doni - Biologi
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (6,6); -- Doni - Ekonomi
-INSERT INTO keahlian(id_guru,id_mapel) VALUES (6,2); -- Doni - Fisika
+-- JADWAL (SLOT WAKTU)
+INSERT INTO jadwal(id_jadwal, id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
+-- Slot Agus (Math)
+(1, 1, 'Senin', '14:00:00', '16:00:00'),
+(2, 1, 'Rabu', '14:00:00', '16:00:00'),
+(3, 2, 'Selasa', '10:00:00', '12:00:00'),
+(4, 2, 'Jumat', '10:00:00', '12:00:00'),
+-- Slot Kapi (Fisika/IPA)
+(5, 3, 'Senin', '16:00:00', '18:00:00'),
+(6, 3, 'Kamis', '13:00:00', '15:00:00'),
+(7, 4, 'Jumat', '13:00:00', '15:00:00'),
+(8, 5, 'Rabu', '16:00:00', '18:00:00'),
+(9, 5, 'Jumat', '16:00:00', '18:00:00'),
+-- Slot Doni (Ekonomi/B.Inggris)
+(10, 6, 'Sabtu', '08:00:00', '10:00:00'),
+(11, 6, 'Kamis', '15:00:00', '17:00:00'),
+(12, 7, 'Senin', '08:00:00', '10:00:00'),
+(13, 7, 'Jumat', '08:00:00', '10:00:00');
 
+-- PENDAFTARAN 
+-- ID 2: John Doe (SMA 1)
+-- ID 4: Hansel (SMA 3)
+-- ID 7: Ivan (SMP 3)
+INSERT INTO pendaftaran(id_daftar, id_murid) VALUES
+(1, 2), (2, 4), (3, 7);
 
+-- PENDAFTARAN ITEM 
+INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) VALUES
+(1, 1, 1, '2026-06-01', '2026-06-01', '14:00:00', '16:00:00', 'Selesai'),
+(3, 12, 12, '2026-06-01', '2026-06-01', '08:00:00', '10:00:00', 'Selesai'),
+(2, 3, 5, '2026-06-02', '2026-06-02', '10:00:00', '12:00:00', 'Selesai'),
+(1, 2, 1, '2026-06-03', '2026-06-03', '14:00:00', '16:00:00', 'Selesai'),
+(3, 8, 11, '2026-06-03', '2026-06-03', '16:00:00', '18:00:00', 'Selesai'),
+(2, 11, 9, '2026-06-04', '2026-06-04', '15:00:00', '17:00:00', 'Selesai'),
+(1, 6, 2, '2026-06-04', '2026-06-04', '13:00:00', '15:00:00', 'Selesai'),
+(1, 1, 1, '2026-06-08', '2026-06-08', '14:00:00', '16:00:00', 'Selesai'),
+(3, 12, 12, '2026-06-08', '2026-06-08', '08:00:00', '10:00:00', 'Selesai'),
+(2, 3, 5, '2026-06-09', '2026-06-09', '10:00:00', '12:00:00', 'Selesai'),
+(1, 2, 1, '2026-06-10', '2026-06-10', '14:00:00', '16:00:00', 'Selesai'),
+(3, 8, 11, '2026-06-10', '2026-06-10', '16:00:00', '18:00:00', 'Selesai'),
 
+(3, 13, 12, '2026-06-12', '2026-06-12', '08:00:00', '10:00:00', 'Mendatang'),
+(2, 4, 5, '2026-06-12', '2026-06-12', '10:00:00', '12:00:00', 'Mendatang'),
+(1, 7, 6, '2026-06-12', '2026-06-12', '13:00:00', '15:00:00', 'Mendatang'),
+(3, 9, 11, '2026-06-12', '2026-06-12', '16:00:00', '18:00:00', 'Mendatang'),
 
+(2, 10, 9, '2026-06-13', '2026-06-13', '08:00:00', '10:00:00', 'Mendatang'),
+(1, 1, 1, '2026-06-15', '2026-06-15', '14:00:00', '16:00:00', 'Mendatang'),
+(3, 12, 12, '2026-06-15', '2026-06-15', '08:00:00', '10:00:00', 'Mendatang'),
+(2, 3, 5, '2026-06-16', '2026-06-16', '10:00:00', '12:00:00', 'Mendatang'),
 
-
--- 6 masukan jadwal kesediaan guru dengan menggunakan id guru dari tabel guru , id mapel dari tabel mapel
--- Jadwal Kesediaan Asli (ID Kesediaan 1 s.d 5)
-INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
-(3,1,'2026-06-01','2026-07-31'),  -- ID 1: Agus - Matematika
-(6,3,'2026-06-01','2026-07-31'),  -- ID 2: Doni - B.Inggris
-(5,2,'2026-06-01','2026-07-31'),  -- ID 3: Kapi - Fisika
-(3,4,'2026-06-01','2026-07-31'),  -- ID 4: Agus - Kimia
-(3,6,'2026-06-01','2026-07-31'),  -- ID 5: Agus - Ekonomi
-(5,4,'2026-06-01','2026-07-31'),  -- ID 6: Kapi - Kimia
-(5,5,'2026-06-01','2026-07-31'),  -- ID 7: Kapi - Biologi
-(6,5,'2026-06-01','2026-07-31'),  -- ID 8: Doni - Biologi
-(6,6,'2026-06-01','2026-07-31');  -- ID 9: Doni - Ekonomi
-
-
-
--- 7. masukan jadwal lebih spesifik dari jadwal_kesediaan 
--- id_kesediaan lihat dlu di jadwal kesediaan
-
-INSERT INTO jadwal(id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
-(1,'Rabu','15:00:00','16:00:00'),   -- ID 1
-(1,'Senin','14:00:00','16:00:00'),  -- ID 2
-(2,'Senin','16:00:00','18:00:00'),  -- ID 3
-(2,'Jumat','16:00:00','18:00:00'),  -- ID 4
-(3,'Jumat','17:00:00','18:00:00'),  -- ID 5
-(3,'Rabu','13:00:00','15:00:00'),   -- ID 6 (Hari biasa untuk Fisika)
-(3,'Kamis','13:00:00','15:00:00'),  -- ID 7 (Untuk slot 11 Juni)   semuanya punya KAPI
-(3,'Sabtu','08:00:00','10:00:00'),  -- ID 8 (Untuk slot 6 & 13 Juni)
-(4,'Senin','08:00:00','10:00:00'),  -- ID 9
-(4,'Selasa','10:00:00','12:00:00'), -- ID 10
-(5,'Sabtu','11:00:00','13:00:00'),  -- ID 11
-(6,'Rabu','10:00:00','12:00:00'),   -- ID 12
-(7,'Kamis','15:00:00','17:00:00'),  -- ID 13
-(8,'Jumat','14:00:00','16:00:00'),  -- ID 14
-(9,'Sabtu','08:00:00','10:00:00'), -- ID 15
-(1, 'Jumat', '14:00:00', '16:00:00'), -- ID 16
-(5, 'Kamis', '10:00:00', '12:00:00'); -- ID 17
-
-
--- 8 insert into Pendaftaran . lihat ke tabel murid id muridnya
--- lihat id murid yang mau didaftarkan
-
-INSERT INTO pendaftaran(id_murid) VALUES
-(7);
-INSERT INTO pendaftaran(id_murid) VALUES
-(2);
-INSERT INTO pendaftaran(id_murid) VALUES
-(4);
-
--- 9 insert ke pendaftaran item, id_daftar lihat dari tabel pendaftaran,id jadwal lihat ke tabel jadwal, id mapel lihat ke tabel mapel
-
-SELECT * FROM mata_pelajaran;
-
-INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) 
-VALUES 
-
-
-(1, 3, 3, '2026-06-01', '2026-06-01', '16:00:00', '18:00:00', 'Selesai'),           -- === STATUS: SELESAI ===   -- ID_DAFTAR 1 | IVAN (SMP 3)  | Mapel: B.INGGRIS (ID 3)  | Jadwal ID 3
-(3, 2, 1, '2026-06-01', '2026-06-01', '14:00:00', '16:00:00', 'Selesai'),             -- ID_DAFTAR 3 | HANSEL (SMA 3)| Mapel: MATEMATIKA (ID 1) | Jadwal ID 2
-(2, 8, 2, '2026-06-06', '2026-06-06', '08:00:00', '10:00:00', 'Selesai'),    -- ID_DAFTAR 2 | JOHN (SMA 1)  | Mapel: FISIKA (ID 2)     | Jadwal ID 8
-
-
-(2, 6, 2, '2026-06-01', '2026-07-31', '13:00:00', '15:00:00', 'Mendatang'),   -- === STATUS: MENDATANG ===    -- ID_DAFTAR 2 | JOHN (SMA 1)  | Mapel: FISIKA (ID 2)     | Jadwal ID 6
-(2, 7, 2, '2026-06-11', '2026-06-11', '13:00:00', '15:00:00', 'Mendatang'),     -- ID_DAFTAR 2 | JOHN (SMA 1)  | Mapel: FISIKA (ID 2)     | Jadwal ID 7
-(2, 8, 2, '2026-06-13', '2026-06-13', '08:00:00', '10:00:00', 'Mendatang'),     -- ID_DAFTAR 2 | JOHN (SMA 1)  | Mapel: FISIKA (ID 2)     | Jadwal ID 8
-(3, 9, 4, '2026-06-15', '2026-07-31', '08:00:00', '10:00:00', 'Mendatang'),     -- ID_DAFTAR 3 | HANSEL (SMA 3)| Mapel: KIMIA (ID 4)      | Jadwal ID 9
-(1, 4, 3, '2026-06-12', '2026-07-31', '16:00:00', '18:00:00', 'Mendatang'),     -- ID_DAFTAR 1 | IVAN (SMP 3)  | Mapel: B.INGGRIS (ID 3)  | Jadwal ID 4
-(3, 16, 1, '2026-06-12', '2026-06-12', '14:00:00', '16:00:00', 'Mendatang'),    -- ID_DAFTAR 3 | HANSEL        | Mapel: MAT
-(3, 17, 6, '2026-06-25', '2026-06-25', '10:00:00', '12:00:00', 'Mendatang'),   -- ID_DAFTAR 3  | HANSEL        | Mapel: EKONOMI
-
-
-(3, 10, 4, '2026-06-02', '2026-06-02', '10:00:00', '12:00:00', 'Batal'), -- === STATUS: BATAL === -- ID_DAFTAR 3 | HANSEL (SMA 3)| Mapel: KIMIA (ID 4)      | Jadwal ID 10
-(3, 11, 6, '2026-06-06', '2026-06-06', '11:00:00', '13:00:00', 'Batal');  -- ID_DAFTAR 3 | HANSEL (SMA 3)| Mapel: EKONOMI (ID 6)    | Jadwal ID 12
+(2, 3, 5, '2026-06-03', '2026-06-03', '10:00:00', '12:00:00', 'Batal'),
+(1, 5, 2, '2026-06-01', '2026-06-01', '16:00:00', '18:00:00', 'Batal'),
+(3, 13, 12, '2026-06-05', '2026-06-05', '08:00:00', '10:00:00', 'Batal');
