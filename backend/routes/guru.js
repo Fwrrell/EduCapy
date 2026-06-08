@@ -22,7 +22,7 @@ router.use(isGuru);
 router.post("/kesediaan", async (req, res) => {
   // extract payload dari frontend
   const { tanggal_awal, tanggal_akhir, jadwal_harian } = req.body;
-
+  // ambil id guru dari database
   const id_guru = req.user.id_user;
 
   if (
@@ -61,6 +61,7 @@ router.post("/kesediaan", async (req, res) => {
             INSERT INTO jadwal_kesediaan (id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) 
             VALUES (?, ?, ?, ?)
         `;
+      // eksekusi query insert kesediaan mengajar dengan parameter
       const [kesediaanResult] = await connection.query(insertKesediaan, [
         id_guru,
         id_mapel,
@@ -87,7 +88,7 @@ router.post("/kesediaan", async (req, res) => {
         }
       }
 
-      // bulk insert ke table jadwal
+      // query insert ke table jadwal untuk jadwal kesediaan guru
       if (jadwalData.length > 0) {
         const insertJadwal = `INSERT INTO jadwal (id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES ?`;
         await connection.query(insertJadwal, [jadwalData]);
@@ -179,11 +180,12 @@ router.get("/kalender", async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
 });
-
+// get method untuk mendapatkan murid aktif berdasarkan kelas dari guru yang diikuti
 router.get("/murid-aktif", async (req, res) => {
   const id_guru = req.user.id_user;
 
   try {
+    // query untuk mendapatkan murid yang mendaftar ke guru tersebut
     const getMuridAktif = `
             SELECT 
                 u.id_user AS id_murid,
@@ -218,7 +220,7 @@ router.get("/murid-aktif", async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
 });
-
+// get method untuk mendapatkan riwayat sesi kelas
 router.get("/riwayat-sesi", async (req, res) => {
   const id_guru = req.user.id_user;
 
@@ -298,7 +300,7 @@ router.get("/riwayat-sesi", async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
 });
-
+// query untuk menampilkan jadwal kelas di dashboard guru
 router.get("/dashboard", async (req, res) => {
   const id_guru = req.user.id_user;
 
@@ -411,7 +413,7 @@ router.get("/dashboard", async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
 });
-
+// update method untuk update status suatu kelas
 router.patch("/sesi/:id/status", async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -453,11 +455,12 @@ router.patch("/sesi/:id/status", async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
 });
-
+// get method untuk keahlian guru/mata pelajar yang diajar oleh guru
 router.get("/keahlian", async (req, res) => {
   const id_guru = req.user.id_user;
 
   try {
+    // query untuk mendapatkan nama mata pelajaran yang bisa diajar oleh guru
     const query = `
       SELECT mp.nama
       FROM keahlian k 
