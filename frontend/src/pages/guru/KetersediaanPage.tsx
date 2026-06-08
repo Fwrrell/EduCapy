@@ -20,7 +20,6 @@ export default function KetersediaanPage() {
   const [step, setStep] = useState(1);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [keahlianData, setKeahlianData] = useState<any | null>(null);
   const [error, setError] = useState("");
@@ -75,14 +74,6 @@ export default function KetersediaanPage() {
     const slotIndex = newDays[dayIndex].slots.findIndex((s) => s.id === slotId);
     newDays[dayIndex].slots[slotIndex][field] = value;
     setDays(newDays);
-  };
-
-  const toggleSubject = (subjectName: string) => {
-    setSelectedSubjects((prev) =>
-      prev.includes(subjectName)
-        ? prev.filter((s) => s !== subjectName)
-        : [...prev, subjectName],
-    );
   };
 
   useEffect(() => {
@@ -202,7 +193,7 @@ export default function KetersediaanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 font-sans text-slate-700">
+    <div className="min-h-screen bg-[#fdfdfd] p-4 md:p-8 font-sans text-slate-700">
       <div className="mx-auto bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         {/* Header */}
         <div className="p-8 border-b border-slate-100">
@@ -403,15 +394,16 @@ export default function KetersediaanPage() {
                 <div className="w-8 h-8 bg-[#406749]/10 text-[#406749] rounded-lg flex items-center justify-center font-bold">
                   3
                 </div>
-                <h2 className="text-lg font-bold">Keahlian Mengajar</h2>
+                <h2 className="text-lg font-bold">Konfirmasi Keahlian</h2>
               </div>
 
-              {error && (
-                <div className="p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-2">
-                  <AlertCircle size={20} />
-                  <span>{error}</span>
+              <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-start gap-3 text-blue-800">
+                <AlertCircle size={20} className="mt-0.5 shrink-0" />
+                <div className="text-sm font-medium">
+                  Jadwal yang dibuat akan otomatis diterapkan untuk semua mata
+                  pelajaran keahlian Anda di bawah ini.
                 </div>
-              )}
+              </div>
 
               {isLoading && !keahlianData ? (
                 <div className="flex items-center justify-center py-8 gap-2 text-[#406749]">
@@ -422,41 +414,17 @@ export default function KetersediaanPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {keahlianData && keahlianData.length > 0 ? (
                     keahlianData.map((subjectName: string, index: number) => (
-                      <button
+                      <div
                         key={index}
-                        onClick={() => toggleSubject(subjectName)}
-                        className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group ${
-                          selectedSubjects.includes(subjectName)
-                            ? "border-[#406749] bg-[#406749]/5 shadow-sm"
-                            : "border-slate-100 bg-white hover:border-slate-200"
-                        }`}
+                        className="p-5 rounded-2xl border border-[#406749]/20 bg-white shadow-sm flex items-center gap-4"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <GraduationCap
-                            size={24}
-                            className={
-                              selectedSubjects.includes(subjectName)
-                                ? "text-[#406749]"
-                                : "text-slate-300"
-                            }
-                          />
-                          {selectedSubjects.includes(subjectName) && (
-                            <CheckCircle2
-                              size={20}
-                              className="text-[#406749]"
-                            />
-                          )}
+                        <div className="w-12 h-12 bg-[#406749]/10 rounded-xl flex items-center justify-center text-[#406749]">
+                          <GraduationCap size={24} />
                         </div>
-                        <span
-                          className={`font-bold ${
-                            selectedSubjects.includes(subjectName)
-                              ? "text-[#406749]"
-                              : "text-slate-600"
-                          }`}
-                        >
+                        <span className="font-bold text-slate-800 text-lg">
                           {subjectName}
                         </span>
-                      </button>
+                      </div>
                     ))
                   ) : (
                     <p className="text-sm text-slate-400 col-span-3 text-center py-4">
