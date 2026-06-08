@@ -1,21 +1,61 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ChevronRight,
   ChevronLeft,
   ListFilter,
   Star,
   MoveRight,
+  Calendar,
 } from "lucide-react";
 import FormDaftar from "@/components/DaftarForm";
-
+const dayNames = [
+  "Minggu",
+  "Senin",
+  "Selasa",
+  "Rabu",
+  "Kamis",
+  "Jumat",
+  "Sabtu",
+];
 export default function Kelas() {
   const [daftarGuru, setDaftarGuru] = useState<any[]>([]);
   const [guruTerpilih, setGuruTerpilih] = useState<any | null>(null);
 
+  const [currentDate, setCurrentDate] = useState(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+  // generate seminggu kedepan
+  const days = useMemo(() => {
+    return Array.from({ length: 7 }).map((_, i) => {
+      const date = new Date(currentDate);
+      date.setDate(currentDate.getDate() + i);
+      return {
+        id: i,
+        name: dayNames[date.getDay()],
+        date: date.getDate(),
+        fullDate: date,
+      };
+    });
+  }, [currentDate]);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isThisWeek = days.some(
+    (d: any) => d.fullDate.getTime() === today.getTime(),
+  );
   useEffect(() => {
     const fetchGuru = async () => {
       try {
-        let url = "http://localhost:3000/api/murid/cari-guru";
+        const formatDate = (dateObj: Date) => {
+          const y = dateObj.getFullYear();
+          const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+          const d = String(dateObj.getDate()).padStart(2, "0");
+          return `${y}-${m}-${d}`;
+        };
+        const startDate = formatDate(days[0].fullDate);
+        const endDate = formatDate(days[6].fullDate);
+        let url = `http://localhost:3000/api/murid/cari-guru?start=${startDate}&end=${endDate}`;
 
         const listGuru = await fetch(url);
         const data = await listGuru.json();
@@ -31,7 +71,26 @@ export default function Kelas() {
       }
     };
     fetchGuru();
-  }, []);
+  }, [days]);
+
+  const nextWeek = () => {
+    const next = new Date(currentDate);
+    next.setDate(currentDate.getDate() + 7);
+    setCurrentDate(next);
+  };
+
+  const prevWeek = () => {
+    if (isThisWeek) return;
+    const prev = new Date(currentDate);
+    prev.setDate(currentDate.getDate() - 7);
+    setCurrentDate(prev);
+  };
+
+  const monthYearStr = currentDate.toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  });
+  const dateRangeStr = `${currentDate.getDate()} - ${days[6].fullDate.getDate()}`;
 
   return (
     <>
@@ -41,18 +100,47 @@ export default function Kelas() {
             cari guru
           </h1>
           <div className="flex items-center gap-3">
-            <div className="rounded-lg flex items-center gap-2 shadow-sm">
-              {/* date */}
-              <span className="capitalize font-semibold text-[#374151] text-normal p-4">
-                mei 7-13, 2026
-              </span>
-              <ChevronLeft color="#9CA3AF" />
-              <ChevronRight color="#9CA3AF" />
+            <div className="rounded-lg flex items-center shadow-sm border border-slate-200 bg-white">
+              <div className="pl-4 pr-2 py-2">
+                <span className="capitalize font-semibold text-[#374151] text-sm">
+                  {monthYearStr}, {dateRangeStr}
+                </span>
+              </div>
+
+              {/* Input stqart tanggal untuk mingguan */}
+              <div className="relative flex items-center justify-center w-8 h-8 mr-1 rounded-md hover:bg-slate-100 transition-colors cursor-pointer group">
+                <Calendar className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+
+                <input
+                  type="date"
+                  value={currentDate.toISOString().split("T")[0]}
+                  onChange={(e) => {
+                    const d = new Date(e.target.value);
+                    if (!isNaN(d.getTime())) {
+                      d.setHours(0, 0, 0, 0);
+                      setCurrentDate(d);
+                    }
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  title="Pilih Tanggal"
+                />
+              </div>
+
+              {/* Button next/prev mingguan */}
+              <button
+                onClick={prevWeek}
+                disabled={isThisWeek}
+                className="p-2 hover:bg-slate-50 border-l border-slate-200 transition-colors cursor-pointer"
+              >
+                <ChevronLeft color="#9CA3AF" className="w-4 h-4" />
+              </button>
+              <button
+                onClick={nextWeek}
+                className="p-2 hover:bg-slate-50 border-l border-slate-200 transition-colors cursor-pointer"
+              >
+                <ChevronRight color="#9CA3AF" className="w-4 h-4" />
+              </button>
             </div>
-            <button className="flex items-center p-4 shadow-sm gap-3 rounded-lg">
-              <ListFilter color="#1E1E18" className="w-5 h-5" />
-              <span className="font-bold text-lg">Filter </span>
-            </button>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-6 ">

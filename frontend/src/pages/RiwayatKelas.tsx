@@ -32,6 +32,35 @@ export default function RiwayatKelas() {
     };
     fetchJadwal();
   }, [token]);
+  const hitungSesi = (mulai: string, selesai: string, hariTarget: string) => {
+    if (!mulai || !selesai || !hariTarget) return 0;
+
+    const hariMap: Record<string, number> = {
+      MINGGU: 0,
+      SENIN: 1,
+      SELASA: 2,
+      RABU: 3,
+      KAMIS: 4,
+      JUMAT: 5,
+      SABTU: 6,
+    };
+    const targetDay = hariMap[hariTarget.toUpperCase()];
+
+    let count = 0;
+    let current = new Date(mulai);
+    const end = new Date(selesai);
+
+    current.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    while (current <= end) {
+      if (current.getDay() === targetDay) {
+        count++;
+      }
+      current.setDate(current.getDate() + 1);
+    }
+    return count;
+  };
   const formatTanggal = (tanggalString: string) => {
     if (!tanggalString) return "-";
     const date = new Date(tanggalString);
@@ -40,6 +69,31 @@ export default function RiwayatKelas() {
       month: "long",
       year: "numeric",
     }).format(date);
+  };
+  const getStatusInfo = (kelas: any) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(kelas.tanggal_mulai);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(kelas.tanggal_selesai);
+    endDate.setHours(0, 0, 0, 0);
+    if (today > endDate) {
+      return { label: "Selesai", isSelesai: true };
+    }
+    const tanggalAwalHitung =
+      today < startDate
+        ? kelas.tanggal_mulai
+        : today.toISOString().split("T")[0];
+    const sisaSesi = hitungSesi(
+      tanggalAwalHitung,
+      kelas.tanggal_selesai,
+      kelas.hari_mengajar,
+    );
+
+    return {
+      label: `Sisa ${sisaSesi} sesi lagi`,
+      isSelesai: false,
+    };
   };
   return (
     <>
@@ -116,9 +170,24 @@ export default function RiwayatKelas() {
                 <div className="w-full h-px bg-slate-200"></div>
 
                 <div className="flex justify-between items-center px-6 py-4">
-                  <div className="flex items-center gap-2 bg-[#FDF0D5] text-[#9A7B38] px-4 py-2 rounded-full text-sm font-bold">
-                    <TriangleAlert className="w-4 h-4" />2 Sesi Bentrok
-                    (Dilewati)
+                  <div className="flex items-center gap-2 text-[#9A7B38] px-4 py-2 rounded-full text-sm font-bold">
+                    {(() => {
+                      const status = getStatusInfo(kelas);
+                      return (
+                        <div
+                          className={`flex items-center gap-2 px-6 py-2 rounded-full text-sm font-bold ${
+                            status.isSelesai
+                              ? "bg-slate-100 text-slate-600"
+                              : "bg-[#22C55E] text-[white]"
+                          }`}
+                        >
+                          {!status.isSelesai && (
+                            <CalendarSync className="w-4 h-4" />
+                          )}
+                          {status.label}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <button
