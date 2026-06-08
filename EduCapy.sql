@@ -25,7 +25,9 @@ CREATE TABLE user (
 CREATE TABLE tingkat_pendidikan (
     id_pendidikan INT AUTO_INCREMENT PRIMARY KEY,
     jenjang VARCHAR(50) NOT NULL,
-    tingkat INT NOT NULL
+    tingkat INT NOT NULL,
+    
+    UNIQUE KEY uq_pendidikan  (jenjang, tingkat)  -- Memastikan kombinasi jenjang dan tingkat unik (tidak ada duplikat 'SMA Kelas 3' dua kali)
 );
 
 CREATE TABLE murid (
@@ -69,7 +71,9 @@ CREATE TABLE jadwal_kesediaan (
     tanggal_akhir_bersedia DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    Foreign Key (id_guru) REFERENCES guru(id_guru)
+    Foreign Key (id_guru) REFERENCES guru(id_guru),
+   
+    CONSTRAINT chk_tanggal_kesediaan CHECK (tanggal_akhir_bersedia >= tanggal_awal_bersedia)  --  Constraint: Tanggal akhir tidak boleh mendahului tanggal awal
 );
 
 CREATE TABLE jadwal (
@@ -80,7 +84,9 @@ CREATE TABLE jadwal (
     jam_selesai TIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    Foreign Key (id_kesediaan) REFERENCES jadwal_kesediaan(id_kesediaan) ON DELETE CASCADE
+    Foreign Key (id_kesediaan) REFERENCES jadwal_kesediaan(id_kesediaan) ON DELETE CASCADE,
+ 
+    CONSTRAINT chk_jam_mengajar CHECK (jam_selesai > jam_mulai)    --  Constraint: Jam selesai les harus setelah jam mulai les
 );
 
 CREATE TABLE pendaftaran (
@@ -104,7 +110,10 @@ CREATE TABLE pendaftaran_item (
 
     Foreign Key (id_daftar) REFERENCES pendaftaran(id_daftar) ON DELETE CASCADE,
     Foreign Key (id_jadwal) REFERENCES jadwal(id_jadwal) ON DELETE CASCADE,
-    Foreign Key (id_mapel) REFERENCES mata_pelajaran(id_mapel) ON DELETE CASCADE
+    Foreign Key (id_mapel) REFERENCES mata_pelajaran(id_mapel) ON DELETE CASCADE,
+   
+    CONSTRAINT chk_tanggal_les CHECK (tanggal_selesai >= tanggal_mulai),  -- Constraints logika waktu transaksi
+    CONSTRAINT chk_jam_les CHECK (jam_selesai_les > jam_mulai_les)
 );
 
 INSERT INTO user (nama, role, email, password)
