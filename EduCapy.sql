@@ -177,15 +177,15 @@ INSERT INTO keahlian(id_guru, id_mapel) VALUES
 (5,2), (5,6), (5,3), (5,7), (5,8), (5,11),
 (6,4), (6,9), (6,12), (6,13);
 
--- JADWAL KESEDIAAN GURU
+-- JADWAL KESEDIAAN GURU (min mengajar 1 bulan)
 INSERT INTO jadwal_kesediaan (id_kesediaan, id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
-(1, 3, 1, '2026-06-01', '2026-06-30'), -- Agus - Math SMA 1
-(2, 3, 5, '2026-06-01', '2026-06-30'), -- Agus - Math SMA 3
-(3, 5, 2, '2026-06-01', '2026-06-30'), -- Kapi - Fisika SMA 1
-(4, 5, 6, '2026-06-01', '2026-06-30'), -- Kapi - Fisika SMA 3
-(5, 5, 11, '2026-06-01', '2026-06-30'), -- Kapi - IPA SMP 3
-(6, 6, 9, '2026-06-01', '2026-06-30'), -- Doni - Ekonomi SMA 3
-(7, 6, 12, '2026-06-01', '2026-06-30'); -- Doni - B.Inggris SMP 3
+(1, 3, 1, '2026-05-15', '2026-08-15'), -- Agus - Math SMA 1 (3 Bulan)
+(2, 3, 5, '2026-06-01', '2026-07-31'), -- Agus - Math SMA 3 (2 Bulan)
+(3, 5, 2, '2026-05-01', '2026-06-30'), -- Kapi - Fisika SMA 1 (2 Bulan)
+(4, 5, 6, '2026-06-01', '2026-07-15'), -- Kapi - Fisika SMA 3 (1.5 Bulan)
+(5, 5, 11, '2026-05-20', '2026-08-20'), -- Kapi - IPA SMP 3 (3 Bulan)
+(6, 6, 9, '2026-06-01', '2026-08-01'), -- Doni - Ekonomi SMA 3 (2 Bulan)
+(7, 6, 12, '2026-05-10', '2026-07-10'); -- Doni - B.Inggris SMP 3 (2 Bulan)
 
 -- JADWAL (SLOT WAKTU)
 INSERT INTO jadwal(id_jadwal, id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
@@ -207,37 +207,32 @@ INSERT INTO jadwal(id_jadwal, id_kesediaan, hari_mengajar, jam_mulai, jam_selesa
 (13, 7, 'Jumat', '08:00:00', '10:00:00');
 
 -- PENDAFTARAN 
--- ID 2: John Doe (SMA 1)
--- ID 4: Hansel (SMA 3)
--- ID 7: Ivan (SMP 3)
 INSERT INTO pendaftaran(id_daftar, id_murid) VALUES
 (1, 2), (2, 4), (3, 7);
 
--- PENDAFTARAN ITEM 
+-- PENDAFTARAN ITEM
 INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) VALUES
-(1, 1, 1, '2026-06-01', '2026-06-01', '14:00:00', '16:00:00', 'Selesai'),
-(3, 12, 12, '2026-06-01', '2026-06-01', '08:00:00', '10:00:00', 'Selesai'),
-(2, 3, 5, '2026-06-02', '2026-06-02', '10:00:00', '12:00:00', 'Selesai'),
-(1, 2, 1, '2026-06-03', '2026-06-03', '14:00:00', '16:00:00', 'Selesai'),
+-- DATA KONTRAK (mingguan/bulanan)
+(1, 1, 1, '2026-06-01', '2026-06-30', '14:00:00', '16:00:00', 'Selesai'),    -- Kontrak Math SMA 1 (Bulan Juni)
+(2, 3, 5, '2026-06-01', '2026-06-15', '10:00:00', '12:00:00', 'Selesai'),    -- Kontrak Math SMA 3 (2 Minggu awal Juni)
+(3, 12, 12, '2026-06-01', '2026-06-30', '08:00:00', '10:00:00', 'Selesai'),  -- Kontrak B.Inggris (Full Juni)
+(1, 6, 2, '2026-06-04', '2026-06-25', '13:00:00', '15:00:00', 'Selesai'),    -- Kontrak Fisika (Setiap Kamis di Juni)
+
+-- DATA HARIAN/SESI TUNGGAL 
 (3, 8, 11, '2026-06-03', '2026-06-03', '16:00:00', '18:00:00', 'Selesai'),
 (2, 11, 9, '2026-06-04', '2026-06-04', '15:00:00', '17:00:00', 'Selesai'),
-(1, 6, 2, '2026-06-04', '2026-06-04', '13:00:00', '15:00:00', 'Selesai'),
-(1, 1, 1, '2026-06-08', '2026-06-08', '14:00:00', '16:00:00', 'Selesai'),
-(3, 12, 12, '2026-06-08', '2026-06-08', '08:00:00', '10:00:00', 'Selesai'),
-(2, 3, 5, '2026-06-09', '2026-06-09', '10:00:00', '12:00:00', 'Selesai'),
-(1, 2, 1, '2026-06-10', '2026-06-10', '14:00:00', '16:00:00', 'Selesai'),
-(3, 8, 11, '2026-06-10', '2026-06-10', '16:00:00', '18:00:00', 'Selesai'),
 
-(3, 13, 12, '2026-06-12', '2026-06-12', '08:00:00', '10:00:00', 'Mendatang'),
-(2, 4, 5, '2026-06-12', '2026-06-12', '10:00:00', '12:00:00', 'Mendatang'),
-(1, 7, 6, '2026-06-12', '2026-06-12', '13:00:00', '15:00:00', 'Mendatang'),
-(3, 9, 11, '2026-06-12', '2026-06-12', '16:00:00', '18:00:00', 'Mendatang'),
+-- DATA KONTRAK AKTIF 
+(3, 13, 12, '2026-06-12', '2026-06-12', '08:00:00', '10:00:00', 'Mendatang'), -- Sesi harian demo
+(2, 4, 5, '2026-06-01', '2026-06-30', '10:00:00', '12:00:00', 'Mendatang'),   -- Kontrak Aktif Juni (Math SMA 3)
+(1, 7, 6, '2026-06-01', '2026-06-21', '13:00:00', '15:00:00', 'Mendatang'),   -- Kontrak 3 Minggu (Fisika SMA 3)
+(3, 9, 11, '2026-06-05', '2026-07-05', '16:00:00', '18:00:00', 'Mendatang'),  -- Kontrak 1 Bulan (IPA SMP 3)
 
-(2, 10, 9, '2026-06-13', '2026-06-13', '08:00:00', '10:00:00', 'Mendatang'),
-(1, 1, 1, '2026-06-15', '2026-06-15', '14:00:00', '16:00:00', 'Mendatang'),
-(3, 12, 12, '2026-06-15', '2026-06-15', '08:00:00', '10:00:00', 'Mendatang'),
-(2, 3, 5, '2026-06-16', '2026-06-16', '10:00:00', '12:00:00', 'Mendatang'),
+-- DATA MENDATANG KONTRAK
+(2, 10, 9, '2026-06-13', '2026-07-13', '08:00:00', '10:00:00', 'Mendatang'),  -- Kontrak Ekonomi (Bulan Juli)
+(1, 1, 1, '2026-07-01', '2026-07-31', '14:00:00', '16:00:00', 'Mendatang'),  -- Perpanjangan Kontrak Math
+(3, 12, 12, '2026-07-01', '2026-07-15', '08:00:00', '10:00:00', 'Mendatang'),
 
+-- SESI BATAL
 (2, 3, 5, '2026-06-03', '2026-06-03', '10:00:00', '12:00:00', 'Batal'),
-(1, 5, 2, '2026-06-01', '2026-06-01', '16:00:00', '18:00:00', 'Batal'),
-(3, 13, 12, '2026-06-05', '2026-06-05', '08:00:00', '10:00:00', 'Batal');
+(1, 5, 2, '2026-06-01', '2026-06-01', '16:00:00', '18:00:00', 'Batal');
