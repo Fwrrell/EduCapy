@@ -240,3 +240,15 @@ INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tan
 -- SESI BATAL
 (2, 3, 5, '2026-06-03', '2026-06-03', '10:00:00', '12:00:00', 'Batal'),
 (1, 5, 2, '2026-06-01', '2026-06-01', '16:00:00', '18:00:00', 'Batal');
+
+-- doni (6) keahlian matematika SMA - 1 (1)
+INSERT INTO keahlian (Id_guru, Id_mapel) VALUES 
+(6, 1); 
+
+
+INSERT INTO jadwal_kesediaan (id_kesediaan, id_guru, id_mapel, tanggal_awal_bersedia, tanggal_akhir_bersedia) VALUES
+(8, 6, 1, '2026-08-16', '2026-10-15'); -- Doni - Matematika SMA 1
+
+INSERT INTO jadwal (id_jadwal, id_kesediaan, hari_mengajar, jam_mulai, jam_selesai) VALUES
+(14, 8, 'Senin', '14:00:00', '16:00:00'); -- Doni - Senin, 14:00 - 16:00
+

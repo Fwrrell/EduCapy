@@ -243,7 +243,7 @@ router.get("/riwayat-sesi", async (req, res) => {
         `;
     const countParams = [id_guru];
 
-    // query untuk mengambil data murid yang les
+    // query untuk mengambil data pendaftaran yang terdaftar
     let dataQuery = `
             SELECT 
                 pi.id_penditem,
