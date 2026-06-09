@@ -76,7 +76,7 @@ export default function Register() {
   };
 
   const handleSubmit = async (e: any) => {
-    if (e) e.preventDefault(); // mencegah reload halaman ketika submit
+    if (e) e.preventDefault();
     setError("");
     setIsLoading(true);
 
@@ -94,7 +94,6 @@ export default function Register() {
       return;
     }
 
-    // susun payload sesuai dengan apa yang diminta server (backend)
     const payload = {
       nama: formData.nama,
       email: formData.email,

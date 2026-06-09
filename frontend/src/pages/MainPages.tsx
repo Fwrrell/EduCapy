@@ -65,10 +65,6 @@ export default function MainPages() {
     const tglMulai = new Date(kelas.tanggal_mulai);
     const tglSelesai = new Date(kelas.tanggal_selesai);
 
-    // LOGIKA:
-    // 1. Kelas tidak batal
-    // 2. Kontrak kelas belum berakhir (tanggal_selesai >= hari ini)
-    // 3. Tanggal mulai kontrak tidak lebih dari 7 hari ke depan
     return (
       kelas.status !== "Batal" &&
       tglSelesai >= hariIni &&
