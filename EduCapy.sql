@@ -216,23 +216,27 @@ INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tan
 (1, 1, 1, '2026-06-01', '2026-06-30', '14:00:00', '16:00:00', 'Selesai'),    -- Kontrak Math SMA 1 (Bulan Juni)
 (2, 3, 5, '2026-06-01', '2026-06-15', '10:00:00', '12:00:00', 'Selesai'),    -- Kontrak Math SMA 3 (2 Minggu awal Juni)
 (3, 12, 12, '2026-06-01', '2026-06-30', '08:00:00', '10:00:00', 'Selesai'),  -- Kontrak B.Inggris (Full Juni)
-(1, 6, 2, '2026-06-04', '2026-06-25', '13:00:00', '15:00:00', 'Selesai'),    -- Kontrak Fisika (Setiap Kamis di Juni)
+(1, 6, 2, '2026-06-04', '2026-06-25', '13:00:00', '15:00:00', 'Selesai')    -- Kontrak Fisika (Setiap Kamis di Juni)
 
+INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) VALUES
 -- DATA HARIAN/SESI TUNGGAL 
 (3, 8, 11, '2026-06-03', '2026-06-03', '16:00:00', '18:00:00', 'Selesai'),
-(2, 11, 9, '2026-06-04', '2026-06-04', '15:00:00', '17:00:00', 'Selesai'),
+(2, 11, 9, '2026-06-04', '2026-06-04', '15:00:00', '17:00:00', 'Selesai')
 
+INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) VALUES
 -- DATA KONTRAK AKTIF 
 (3, 13, 12, '2026-06-12', '2026-06-12', '08:00:00', '10:00:00', 'Mendatang'), -- Sesi harian demo
 (2, 4, 5, '2026-06-01', '2026-06-30', '10:00:00', '12:00:00', 'Mendatang'),   -- Kontrak Aktif Juni (Math SMA 3)
 (1, 7, 6, '2026-06-01', '2026-06-21', '13:00:00', '15:00:00', 'Mendatang'),   -- Kontrak 3 Minggu (Fisika SMA 3)
-(3, 9, 11, '2026-06-05', '2026-07-05', '16:00:00', '18:00:00', 'Mendatang'),  -- Kontrak 1 Bulan (IPA SMP 3)
+(3, 9, 11, '2026-06-05', '2026-07-05', '16:00:00', '18:00:00', 'Mendatang')  -- Kontrak 1 Bulan (IPA SMP 3)
 
+INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) VALUES
 -- DATA MENDATANG KONTRAK
 (2, 10, 9, '2026-06-13', '2026-07-13', '08:00:00', '10:00:00', 'Mendatang'),  -- Kontrak Ekonomi (Bulan Juli)
 (1, 1, 1, '2026-07-01', '2026-07-31', '14:00:00', '16:00:00', 'Mendatang'),  -- Perpanjangan Kontrak Math
-(3, 12, 12, '2026-07-01', '2026-07-15', '08:00:00', '10:00:00', 'Mendatang'),
+(3, 12, 12, '2026-07-01', '2026-07-15', '08:00:00', '10:00:00', 'Mendatang');
 
+INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) VALUES
 -- SESI BATAL
 (2, 3, 5, '2026-06-03', '2026-06-03', '10:00:00', '12:00:00', 'Batal'),
 (1, 5, 2, '2026-06-01', '2026-06-01', '16:00:00', '18:00:00', 'Batal');

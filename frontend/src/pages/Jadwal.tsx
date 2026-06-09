@@ -190,16 +190,6 @@ export default function Jadwal() {
       isCoret: false,
     };
   };
-  // 1. Cari kelas hari ini
-  const hariMap: Record<number, string> = {
-    0: "MINGGU",
-    1: "SENIN",
-    2: "SELASA",
-    3: "RABU",
-    4: "KAMIS",
-    5: "JUMAT",
-    6: "SABTU",
-  };
 
   const kelasHariIni = jadwal.find((kelas) => {
     if (kelas.status !== "Mendatang") return false;

@@ -97,23 +97,14 @@ router.get("/jadwal/:id_guru", async (req, res) => {
 // post method untuk menyimmpan hasil pendaftaran kelas/les murid
 router.post("/booking", verifyToken, async (req, res) => {
   const id_murid = req.user.id_user;
-  // Hapus semua deklarasi variabel yang terpisah, satukan di sini:
-  const {
-    id_jadwal,
-    nama_mapel,
-    tanggal_mulai,
-    tanggal_selesai,
-    jam_mulai_les,
-    jam_selesai_les,
-  } = req.body;
+  const { jadwal_list, nama_mapel, tanggal_mulai, tanggal_selesai } = req.body;
 
   if (
-    !id_jadwal ||
+    !jadwal_list ||
+    jadwal_list.length === 0 ||
     !nama_mapel ||
     !tanggal_mulai ||
-    !tanggal_selesai ||
-    !jam_mulai_les ||
-    !jam_selesai_les
+    !tanggal_selesai
   ) {
     return res
       .status(400)
@@ -136,21 +127,22 @@ router.post("/booking", verifyToken, async (req, res) => {
       "INSERT INTO pendaftaran (id_murid) VALUES (?)",
       [id_murid],
     );
-
-    // PERBAIKAN: Pastikan kolom di database sesuai (hapus 'Booking Baru' jika tidak ada di DB)
-    await connection.query(
-      `INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'Mendatang')`,
-      [
-        daftarResult.insertId,
-        id_jadwal,
-        id_mapel,
-        tanggal_mulai,
-        tanggal_selesai,
-        jam_mulai_les,
-        jam_selesai_les,
-      ],
-    );
+    const id_daftar = daftarResult.insertId;
+    for (const slot of jadwal_list) {
+      await connection.query(
+        `INSERT INTO pendaftaran_item (id_daftar, id_jadwal, id_mapel, tanggal_mulai, tanggal_selesai, jam_mulai_les, jam_selesai_les, status) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'Mendatang')`,
+        [
+          id_daftar,
+          slot.id_jadwal,
+          id_mapel,
+          tanggal_mulai,
+          tanggal_selesai,
+          slot.jamMulaiSpesifik,
+          slot.jamAkhirSpesifik,
+        ],
+      );
+    }
 
     await connection.commit();
     res.status(201).json({ message: "Berhasil menyimpan ke daftar booking!" });

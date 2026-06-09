@@ -16,7 +16,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
   const [tanggalMulai, setTanggalMulai] = useState("");
   const [tanggalSelesai, setTanggalSelesai] = useState("");
   const [hariTerpilih, setHaridipilih] = useState("");
-  const [jamTerpilih, setJamdipilih] = useState("");
+  const [slotTerpilih, setSlotTerpilih] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   // state apakah guru tersedia pada rentang waktu yang diinginkan murid
   const [intersection, setIntersection] = useState<
@@ -31,31 +31,40 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
   const [sisaKontrak, setSisaKontrak] = useState({ mulai: "", selesai: "" });
   const [listGuruPengganti, setGuruPengganti] = useState<any[]>([]);
   const [penggantiTerpilih, setPenggantiTerpilih] = useState<any>(null);
-
-  const fetchGuruPengganti = async () => {
-    if (!mapelTerpilih || !hariTerpilih || !jamTerpilih) {
-      alert(
-        "Silakan pilih mata pelajaran, hari dan jam kelas terlebih dahulu sebelum mencari pengganti!",
-      );
-      return;
-    }
-    const jamM = jamTerpilih.split(" - ")[0] + ":00";
-    const jamS = jamTerpilih.split(" - ")[1] + ":00";
-    const url = `http://localhost:3000/api/murid/cari-pengganti?mapel=${encodeURIComponent(mapelTerpilih)}&hari=${hariTerpilih}&jamMulai=${jamM}&jamSelesai=${jamS}&mulai=${sisaKontrak.mulai}&selesai=${sisaKontrak.selesai}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    const uniqueTeachers = data.filter(
-      (guru: any, index: number, self: any[]) =>
-        index === self.findIndex((t) => t.id === guru.id),
-    );
-
-    setGuruPengganti(uniqueTeachers);
-    setGuruPengganti(data);
-  };
   // state jadwal kesediaan guru
   const [jadwal, setJadwal] = useState<any[]>([]);
   // state jadwal peserta mendaftar
   const [jadwalTerbooking, setJadwalTerbooking] = useState<any[]>([]);
+  // fungsi toggle untuk menyimpan slot sesi tersedia yang dipilih murid
+  const toggleSlotJam = (jamObj: any) => {
+    setSlotTerpilih((prev) => {
+      const isSelected = prev.some((p) => p.label === jamObj.label);
+      if (isSelected) {
+        return prev.filter((p) => p.label !== jamObj.label);
+      } else {
+        return [...prev, jamObj];
+      }
+    });
+  };
+  // fetch jadwal guru dan jadwal guru yang telah di book
+  useEffect(() => {
+    const fetchJadwal = async () => {
+      try {
+        const dataJadwalGuru = await fetch(
+          `http://localhost:3000/api/murid/jadwal/${guru.id}`,
+        );
+        const data = await dataJadwalGuru.json();
+        setJadwal(data.tersedia || []);
+        setJadwalTerbooking(data.terbooking || []);
+      } catch (error) {
+        console.error("gagal fetch jadwal:", error);
+      }
+    };
+    if (guru.id) {
+      fetchJadwal();
+    }
+  }, [guru.id]);
+  // periksa apakah jadwal guru sesuai dengan rentang jadwal yang dipilih murid
   useEffect(() => {
     if (!guru) return;
 
@@ -85,7 +94,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
         new Date(a.tanggal_awal_bersedia).getTime() -
         new Date(b.tanggal_awal_bersedia).getTime(),
     );
-    // periksa jika jadwal yang dipilih murid berisisan dengan 2 jadwal kesediaan berbeda
+    // periksa jika jadwal yang dipilih murid beririsan dengan 2 jadwal kesediaan berbeda
     let celah = false;
     if (jadwal && jadwal.length > 1) {
       for (let i = 0; i < sortedJadwal.length - 1; i++) {
@@ -94,7 +103,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
 
         // Jika ada jeda lebih dari 1 hari, dianggap celah
         if (startRow2 > endRow1 + 24 * 60 * 60 * 1000) {
-          // Cek apakah rentang murid memotong celah tersebut
+          // Cek apakah rentang murid beririsan dengan jeda jadwal kosong
           if (endRow1 < E2 && startRow2 > S2) {
             celah = true;
             break;
@@ -102,6 +111,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
         }
       }
     }
+    // jika beririsan dengan 2 jadwal berbeda dari jadwal kesediaan guru yang sama maka tidak bisa book
     if (celah) {
       setIntersection("none");
       return;
@@ -143,24 +153,29 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
       }
     }
   }, [tanggalMulai, tanggalSelesai, guru, jadwal]);
-
-  useEffect(() => {
-    const fetchJadwal = async () => {
-      try {
-        const dataJadwalGuru = await fetch(
-          `http://localhost:3000/api/murid/jadwal/${guru.id}`,
-        );
-        const data = await dataJadwalGuru.json();
-        setJadwal(data.tersedia || []);
-        setJadwalTerbooking(data.terbooking || []);
-      } catch (error) {
-        console.error("gagal fetch jadwal:", error);
-      }
-    };
-    if (guru.id) {
-      fetchJadwal();
+  // fetch data guru pengganti
+  const fetchGuruPengganti = async () => {
+    if (!mapelTerpilih || !hariTerpilih || slotTerpilih.length === 0) {
+      alert(
+        "Silakan pilih mata pelajaran, hari dan jam kelas terlebih dahulu sebelum mencari pengganti!",
+      );
+      return;
     }
-  }, [guru.id]);
+    const sortedSlot = [...slotTerpilih].sort((a, b) =>
+      a.jamMulaiSpesifik.localeCompare(b.jamMulaiSpesifik),
+    );
+    const jamM = sortedSlot[0].jamMulaiSpesifik;
+    const jamS = sortedSlot[sortedSlot.length - 1].jamAkhirSpesifik;
+    const url = `http://localhost:3000/api/murid/cari-pengganti?mapel=${encodeURIComponent(mapelTerpilih)}&hari=${hariTerpilih}&jamMulai=${jamM}&jamSelesai=${jamS}&mulai=${sisaKontrak.mulai}&selesai=${sisaKontrak.selesai}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    const uniqueTeachers = data.filter(
+      (guru: any, index: number, self: any[]) =>
+        index === self.findIndex((t) => t.id === guru.id),
+    );
+
+    setGuruPengganti(uniqueTeachers);
+  };
 
   const hariTersedia = [
     ...new Set(jadwal.map((item) => item.hari_mengajar.toUpperCase())),
@@ -191,7 +206,15 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
           }
           return isHariSama && isJamSama;
         });
-        if (!isBooked && !jamMap.has(labelJam)) {
+        const isLewat = () => {
+          if (
+            new Date(tanggalMulai).toDateString() !== new Date().toDateString()
+          )
+            return false;
+          const jamSekarang = new Date().getHours();
+          return mulai < jamSekarang;
+        };
+        if (!isBooked && !jamMap.has(labelJam) && !isLewat()) {
           jamMap.set(labelJam, {
             id_jadwal: item.id_jadwal,
             label: `${jamMulai} - ${jamAkhir}`,
@@ -209,7 +232,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
       !tanggalMulai ||
       !tanggalSelesai ||
       !hariTerpilih ||
-      !jamTerpilih
+      slotTerpilih.length === 0
     ) {
       alert("Harap lengkapi semua pilihan (Mapel, Tanggal, Hari, dan Jam)!");
       return;
@@ -220,18 +243,28 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
       alert("Tanggal mulai tidak boleh lebih dari tanggal selesai!");
       return;
     }
-
-    const selectedJadwal = jamTersedia.find(
-      (slot) => slot.label === jamTerpilih,
+    const sortedSlot = [...slotTerpilih].sort((a, b) =>
+      a.jamMulaiSpesifik.localeCompare(b.jamMulaiSpesifik),
     );
 
-    if (!selectedJadwal) {
-      alert("Jadwal tidak valid!");
-      return;
+    const mergedSlots: any[] = [];
+    for (const slot of sortedSlot) {
+      if (mergedSlots.length === 0) {
+        mergedSlots.push({ ...slot });
+      } else {
+        const lastSlot = mergedSlots[mergedSlots.length - 1];
+
+        if (
+          lastSlot.jamAkhirSpesifik === slot.jamMulaiSpesifik &&
+          lastSlot.id_jadwal === slot.id_jadwal
+        ) {
+          lastSlot.jamAkhirSpesifik = slot.jamAkhirSpesifik;
+        } else {
+          mergedSlots.push({ ...slot });
+        }
+      }
     }
-
     setIsLoading(true);
-
     try {
       // ambil token dari user tujuan nya biar tau user mana yang daftar
       const token = localStorage.getItem("token");
@@ -243,7 +276,7 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          id_jadwal: selectedJadwal.id_jadwal,
+          jadwal_list: mergedSlots,
           nama_mapel: mapelTerpilih,
           tanggal_mulai:
             intersection === "partial" ? tanggalEfektif.mulai : tanggalMulai,
@@ -251,8 +284,6 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
             intersection === "partial"
               ? tanggalEfektif.selesai
               : tanggalSelesai,
-          jam_mulai_les: selectedJadwal.jamMulaiSpesifik,
-          jam_selesai_les: selectedJadwal.jamAkhirSpesifik,
         }),
       });
 
@@ -262,14 +293,16 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
         throw new Error(result.message || "Gagal melakukan booking");
       }
       if (intersection === "partial" && penggantiTerpilih) {
-        // PERHATIAN: Di Backend (API cari-pengganti), kamu WAJIB mengembalikan `id_jadwal` milik guru pengganti
-        // yang sesuai dengan mapel, hari, dan jam yang dicari.
         if (!penggantiTerpilih.id_jadwal) {
           throw new Error(
             "Sistem Backend belum mengirimkan id_jadwal untuk guru pengganti ini.",
           );
         }
 
+        const jadwalListPengganti = mergedSlots.map((slot) => ({
+          ...slot,
+          id_jadwal: penggantiTerpilih.id_jadwal,
+        }));
         const resPengganti = await fetch(
           "http://localhost:3000/api/murid/booking",
           {
@@ -279,12 +312,10 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              id_jadwal: penggantiTerpilih.id_jadwal,
+              jadwal_list: jadwalListPengganti,
               nama_mapel: mapelTerpilih,
               tanggal_mulai: sisaKontrak.mulai,
               tanggal_selesai: sisaKontrak.selesai,
-              jam_mulai_les: selectedJadwal.jamMulaiSpesifik,
-              jam_selesai_les: selectedJadwal.jamAkhirSpesifik,
             }),
           },
         );
@@ -485,7 +516,6 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
                         key={hari}
                         onClick={() => {
                           setHaridipilih(hari);
-                          setJamdipilih(""); // Reset jam jika ganti hari
                         }}
                         className={`px-4 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
                           hari === hariTerpilih
@@ -513,19 +543,25 @@ export default function DaftarForm({ guru, onClose }: FormDaftarProps) {
                     </p>
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {jamTersedia.map((jam, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setJamdipilih(jam.label)}
-                          className={`py-2 px-1 rounded-xl text-sm font-bold border transition-colors ${
-                            jam.label === jamTerpilih
-                              ? "bg-[#406749] border-[#406749] text-white"
-                              : "bg-white border-slate-200 text-slate-600 hover:border-[#406749]"
-                          }`}
-                        >
-                          {jam.label}
-                        </button>
-                      ))}
+                      {jamTersedia.map((jam, index) => {
+                        const isSelected = slotTerpilih.some(
+                          (s) => s.label === jam.label,
+                        );
+
+                        return (
+                          <button
+                            key={index}
+                            onClick={() => toggleSlotJam(jam)}
+                            className={`py-2 px-1 rounded-xl text-sm font-bold border transition-colors ${
+                              isSelected
+                                ? "bg-[#406749] border-[#406749] text-white"
+                                : "bg-white border-slate-200 text-slate-600 hover:border-[#406749]"
+                            }`}
+                          >
+                            {jam.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
